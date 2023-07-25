@@ -1,0 +1,55 @@
+{
+  "name": "geokoder",
+  "description": "Kalisio geocoding service",
+  "version": "0.1.0",
+  "homepage": "https://github.com/kalisio/geokoder",
+  "main": "src/main.js",
+  "bin": "src/bin.js",
+  "type": "module",
+  "keywords": [
+    "geocoding",
+    "api"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/kalisio/geokoder.git"
+  },
+  "author": {
+    "name": "Kalisio contributors",
+    "url": "https://github.com/kalisio/geokoder"
+  },
+  "contributors": [],
+  "bugs": {
+    "url": "https://github.com/kalisio/geokoder/issues"
+  },
+  "scripts": {
+    "dev": "nodemon --watch src --exec npm run debug",
+    "debug": "cross-env NODE_ENV=development node --inspect=:9222 src/bin.js",
+    "prod": "cross-env NODE_ENV=production node src/bin.js",
+    "lint": "standard src/**/*.js test/**/*.js --fix",
+    "mocha": "cross-env NODE_CONFIG_DIR=./test/config/ mocha --exit",
+    "coverage": "c8 npm run mocha",
+    "test": "npm run lint && npm run coverage"
+  },
+  "standard": {
+    "sourceType": "module",
+    "env": [
+      "mocha"
+    ]
+  },
+  "dependencies": {
+    "@feathersjs/configuration": "^5.0.0",
+    "@feathersjs/express": "^5.0.0",
+    "@feathersjs/feathers": "^5.0.0",
+    "@kalisio/feathers-distributed": "^2.0.2",
+    "lodash": "^4.17.21",
+    "winston": "^3.2.1"
+  },
+  "devDependencies": {
+    "c8": "^7.11.0",
+    "cross-env": "^7.0.3",
+    "nodemon": "^2.0.15",
+    "standard": "^16.0.4"
+  }
+}
