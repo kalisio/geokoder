@@ -12,12 +12,8 @@ module.exports = {
   baseUrl,
   apiPath,
   geocoders: [
-    { name: 'rte-units', collection: 'rte-units', key: 'properties.name' },
-    { name: 'teleray-sensors', collection: 'teleray-sensors', key: 'properties.name' },
-    { name: 'semence-stations', collection: 'semence-stations', key: 'properties.station' },
-    { name: 'zsv', collection: 'zsv', key: 'properties.station' },
-    { name: 'icos-stations', collection: 'icos-stations', key: 'properties.stationName' },
-    { name: 'hubeau-stations', collection: 'hubeau-stations', key: 'properties.name' },
+    { provider: 'opendatafrance' },
+    { provider: 'openstreetmap', headers: { 'user-agent': 'geokoder/0.1.0', referrer: '/forward' } }
   ],
   logs: {
     Console: {
