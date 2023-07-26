@@ -1,3 +1,6 @@
+// https://github.com/richmilne/JaroWinkler/blob/master/jaro/strcmp95.c
+// https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance
+
 function jaroSimilarity (s1, s2) {
   if (s1.length === 0 || s2.length === 0)
     return 0

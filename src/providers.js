@@ -2,7 +2,6 @@ import _ from 'lodash'
 import makeDebug from 'debug'
 import fetch from 'node-fetch'
 import NodeGeocoder from 'node-geocoder'
-import { scoreResult } from './scoring.js'
 
 const debug = makeDebug('geokoder:providers')
 
@@ -37,6 +36,12 @@ export async function createKanoProvider (app) {
   debug(`Kano provider: found ${sources.length} sources`)
 
   return {
+    capabilities () {
+      return [
+        { name: 'kano', source: sources.map((source) => source.name) }
+      ]
+    },
+
     async forward (search) {
       // issue requests to discovered services
       let requests = []
@@ -48,7 +53,9 @@ export async function createKanoProvider (app) {
           const request = service.find({ query })
           request.source = source
           requests.push(request)
-        } catch (error) {}
+        } catch (error) {
+          debug(error)
+        }
       }
 
       // fetch response, score them and sort by score
@@ -63,20 +70,21 @@ export async function createKanoProvider (app) {
           continue
         }
 
-        const features = _.get(result.value, 'type') === 'FeatureCollection' ? result.value.features : [ result.value ]
+        const features = result.value.features
         for (const feature of features) {
           const name = _.get(feature, source.keys[0])
           response.push({
             provider: 'kano',
             source: source.name,
-            name,
-            location: feature.geometry.coordinates,
-            score: scoreResult(search.toUpperCase(), name.toUpperCase())
+            match: name,
+            // TODO: might not be this one
+            matchProp: source.keys[0],
+            // omit internal _id prop
+            feature: _.omit(feature, [ '_id' ]),
           })
         }
       }
 
-      response.sort((a, b) => { return a.score < b.score ? 1 : a.score > b.score ? -1 : 0 })
       return response
     },
 
@@ -87,14 +95,16 @@ export async function createKanoProvider (app) {
       for (const source of sources) {
         try {
           const service = app.service(`${apiPath}/${source.collection}`)
-          const query = { latitude: lat, longitude: lon, distance: 1 }
+          const query = { latitude: lat, longitude: lon, distance: 1000 }
           const request = service.find({ query })
           request.source = source
           requests.push(request)
-        } catch (error) {}
+        } catch (error) {
+          debug(error)
+        }
       }
 
-      // const response = []
+      const response = []
       const results = await Promise.allSettled(requests)
       for (let i = 0; i < results.length; ++i) {
         const result = results[i]
@@ -105,25 +115,19 @@ export async function createKanoProvider (app) {
           continue
         }
 
-        const features = _.get(result.value, 'type') === 'FeatureCollection' ? result.value.features : [ result.value ]
-        /*
+        const features = result.value.features
         for (const feature of features) {
           const name = _.get(feature, source.keys[0])
           response.push({
             provider: 'kano',
             source: source.name,
-            name,
-            location: feature.geometry.coordinates,
-            score: scoreResult(search.toUpperCase(), name.toUpperCase())
+            // omit internal _id prop
+            feature: _.omit(feature, [ '_id' ]),
           })
         }
-        */
       }
 
-      // response.sort((a, b) => { return a.score < b.score ? 1 : a.score > b.score ? -1 : 0 })
-      // return response
-
-      return features
+      return response
     }
   }
 }
@@ -142,6 +146,13 @@ export async function createNodeGeocoderProvider (app) {
   })
 
   return {
+    capabilities () {
+      return [
+        { name: 'opendatafrance', source: [ 'municipality', 'locality', 'street', 'housenumber' ] },
+        { name: 'openstreetmap', source: [ 'default' ] }
+      ]
+    },
+
     async forward (search) {
       const requests = []
       geocoders.forEach((geocoder) => {
@@ -163,15 +174,34 @@ export async function createNodeGeocoderProvider (app) {
         if (entry.provider === 'opendatafrance') {
           // https://adresse.data.gouv.fr/api-doc/adresse
           const props = _.omit(entry, [ 'latitude', 'longitude', 'provider' ])
-          const feat = { type: 'Feature', properties: props, geometry: { coordinates: [ entry.longitude, entry.latitude ] } }
+          const feat = { type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: [ entry.longitude, entry.latitude ] } }
           const norm = {
-            provider: 'node-geocoder',
-            source: entry.provider,
-            name: entry.type === 'municipality' ? entry.city : entry.type === 'street' ? entry.streetName : 'foo',
-            location: feat.geometry.coordinates
+            provider: entry.provider,
+            source: entry.type,
+            feature: feat
           }
-          // return norm
+          if (entry.type === 'municipality') {
+            norm.matchProp = 'city'
+          } else if (entry.type === 'locality') {
+            norm.matchProp = 'streetName'
+          } else if (entry.type === 'street') {
+            norm.matchProp = 'streetName'
+          } else if (entry.type === 'housenumber') {
+            norm.matchProp = 'streetName'
+          }
+          norm.match = _.get(entry, norm.matchProp, 'foo')
+          return norm
         } else if (entry.provider === 'openstreetmap') {
+          const props = _.omit(entry, [ 'latitude', 'longitude', 'provider' ])
+          const feat = { type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: [ entry.longitude, entry.latitude ] } }
+          const norm = {
+            provider: entry.provider,
+            source: entry.type,
+            feature: feat
+          }
+          norm.matchProp = 'foo'
+          norm.match = _.get(entry, norm.matchProp, 'foo')
+          return norm
         } else {
           debug(`Don't know how to normalize results from provider '${entry.provider}'`)
         }
@@ -200,7 +230,23 @@ export async function createNodeGeocoderProvider (app) {
         // 'normalize' response
         if (entry.provider === 'opendatafrance') {
           // https://adresse.data.gouv.fr/api-doc/adresse
+          const props = _.omit(entry, [ 'latitude', 'longitude', 'provider' ])
+          const feat = { type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: [ entry.longitude, entry.latitude ] } }
+          const norm = {
+            provider: entry.provider,
+            source: entry.type,
+            feature: feat
+          }
+          return norm
         } else if (entry.provider === 'openstreetmap') {
+          const props = _.omit(entry, [ 'latitude', 'longitude', 'provider' ])
+          const feat = { type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: [ entry.longitude, entry.latitude ] } }
+          const norm = {
+            provider: entry.provider,
+            source: entry.type,
+            feature: feat
+          }
+          return norm
         } else {
           debug(`Don't know how to normalize results from provider '${entry.provider}'`)
         }

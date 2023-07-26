@@ -30,12 +30,11 @@ export default async function (app) {
   })
   */
 
-  app.get('/forward', async (req, res, next) => {
-    const q = _.get(req.query, 'q')
-
+  app.get('/capabilities', async (req, res, next) => {
     const all = []
-    all.push(createKanoProvider(app).then((provider) => provider.forward(q)))
-    all.push(createNodeGeocoderProvider(app).then((provider) => provider.forward(q)))
+    all.push(createKanoProvider(app).then((provider) => provider.capabilities()))
+    all.push(createNodeGeocoderProvider(app).then((provider) => provider.capabilities()))
+
     const response = []
     const results = await Promise.allSettled(all)
     results.forEach((result) => {
@@ -48,22 +47,70 @@ export default async function (app) {
     res.json(response)
   })
 
-  app.get('/reverse', async (req, res, next) => {
-    const lat = _.get(req.query, 'lat')
-    const lon = _.get(req.query, 'lon')
+  app.get('/forward', async (req, res, next) => {
+    const q = _.get(req.query, 'q')
 
     const all = []
-    all.push(createKanoProvider(app).then((provider) => provider.reverse({ lat, lon })))
-    all.push(createNodeGeocoderProvider(app).then((provider) => provider.reverse({ lat, lon })))
+    all.push(createKanoProvider(app).then((provider) => provider.forward(q)))
+    all.push(createNodeGeocoderProvider(app).then((provider) => provider.forward(q)))
     const response = []
     const results = await Promise.allSettled(all)
     results.forEach((result) => {
       if (result.status !== 'fulfilled')
         return
 
-      response.splice(-1, 0, ...result.value)
+      result.value.forEach((entry) => {
+        const normalized = entry.feature
+        normalized.geokoder = {
+          provider: entry.provider,
+          source: entry.source,
+          match: entry.match,
+          matchProp: entry.matchProp,
+          score: scoreResult(q.toUpperCase(), entry.match.toUpperCase())
+        }
+        response.push(normalized)
+      })
+    })
+
+    // sort by score
+    response.sort((a, b) => {
+      return a.geokoder.score < b.geokoder.score ?
+        1 : a.geokoder.score > b.geokoder.score ?
+        -1 : 0
     })
 
     res.json(response)
+  })
+
+  app.get('/reverse', async (req, res, next) => {
+    const lat = parseFloat(_.get(req.query, 'lat'))
+    const lon = parseFloat(_.get(req.query, 'lon'))
+
+    if (lat !== NaN && lon !== NaN) {
+      const all = []
+      all.push(createKanoProvider(app).then((provider) => provider.reverse({ lat, lon })))
+      all.push(createNodeGeocoderProvider(app).then((provider) => provider.reverse({ lat, lon })))
+      const response = []
+      const results = await Promise.allSettled(all)
+      results.forEach((result) => {
+        if (result.status !== 'fulfilled')
+          return
+
+        result.value.forEach((entry) => {
+          const normalized = entry.feature
+          normalized.geokoder = {
+            provider: entry.provider,
+            source: entry.source,
+            // TODO: score by distance ?
+            // score: scoreResult(q.toUpperCase(), entry.match.toUpperCase())
+          }
+          response.push(normalized)
+        })
+      })
+
+      res.json(response)
+    } else {
+      // TODO: ?
+    }
   })
 }
