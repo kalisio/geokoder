@@ -11,9 +11,15 @@ module.exports = {
   port,
   baseUrl,
   apiPath,
-  geocoders: [
+  NodeGeocoder: [
     { provider: 'opendatafrance' },
     { provider: 'openstreetmap', headers: { 'user-agent': 'geokoder/0.1.0', referrer: '/forward' } }
+  ],
+  renames: [
+    { from: 'kano:rte-units', to: 'rte' },
+    { from: 'kano:hubeau-hydro-stations', to: 'hubeau:hydro' },
+    { from: 'opendatafrance', to: 'ban' },
+    { from: 'openstreetmap', to: 'nominatim' },
   ],
   logs: {
     Console: {

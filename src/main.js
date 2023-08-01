@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import winston from 'winston'
+import cors from 'cors'
 import feathers from '@feathersjs/feathers'
 import configuration from '@feathersjs/configuration'
 import express from '@feathersjs/express'
@@ -15,6 +16,8 @@ export default async function createServer () {
   app.configure(configuration())
   // Get distributed services
   app.configure(distribution(app.get('distribution')))
+
+  app.use(cors(app.get('cors')))
 
   // Register hooks
   app.hooks(hooks)

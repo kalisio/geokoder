@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import makeDebug from 'debug'
+import { minimatch } from 'minimatch'
 import fetch from 'node-fetch'
 import NodeGeocoder from 'node-geocoder'
 
@@ -7,6 +8,7 @@ const debug = makeDebug('geokoder:providers')
 
 export async function createKanoProvider (app) {
   const apiPath = app.get('apiPath')
+  const renames = app.get('renames')
 
   // use the catalog service to build a list of sources (ie. feature services we can use)
   let sources = []
@@ -26,7 +28,9 @@ export async function createKanoProvider (app) {
         const collection = _.get(layer, 'probeService', layer.service)
         // featureLabel refers to feature properties
         const featureLabels = _.castArray(layer.featureLabel).map((prop) => `properties.${prop}`)
-        sources.push({ name: layer.name, collection, keys: featureLabels })
+        const internalName = `kano:${collection}`
+        const mapping = renames.find((item) => item.from === internalName)
+        sources.push({ name: mapping ? mapping.to : internalName, internalName, collection, keys: featureLabels })
       })
     }
   } catch (error) {
@@ -37,15 +41,16 @@ export async function createKanoProvider (app) {
 
   return {
     capabilities () {
-      return [
-        { name: 'kano', source: sources.map((source) => source.name) }
-      ]
+      const caps = sources.map((source) => source.name )
+      return caps
     },
 
-    async forward (search) {
+    async forward (search, filter) {
+      const matchingSources = filter ? sources.filter((source) => minimatch(source.name, filter)) : sources
+
       // issue requests to discovered services
       let requests = []
-      for (const source of sources) {
+      for (const source of matchingSources) {
         try {
           const service = app.service(`${apiPath}/${source.collection}`)
           const searches = source.keys.map((key) => { return { [key]: { $search: search } } })
@@ -71,10 +76,10 @@ export async function createKanoProvider (app) {
         }
 
         const features = result.value.features
+        debug(`request to ${source.collection}: ${features.length} results`)
         for (const feature of features) {
           const name = _.get(feature, source.keys[0])
           response.push({
-            provider: 'kano',
             source: source.name,
             match: name,
             // TODO: might not be this one
@@ -119,7 +124,6 @@ export async function createKanoProvider (app) {
         for (const feature of features) {
           const name = _.get(feature, source.keys[0])
           response.push({
-            provider: 'kano',
             source: source.name,
             // omit internal _id prop
             feature: _.omit(feature, [ '_id' ]),
@@ -133,7 +137,9 @@ export async function createKanoProvider (app) {
 }
 
 export async function createNodeGeocoderProvider (app) {
-  const config = app.get('geocoders')
+  const config = app.get('NodeGeocoder')
+  const renames = app.get('renames')
+
   const geocoders = []
   config.forEach((conf) => {
     const sup = {}
@@ -142,117 +148,109 @@ export async function createNodeGeocoderProvider (app) {
         return fetch(url, { ...options, headers: conf.headers })
       }
     }
-    geocoders.push(NodeGeocoder(Object.assign({}, conf, sup)))
+
+    const internalName = conf.provider
+    const mapping = renames.find((item) => item.from === internalName)
+    geocoders.push({ name: mapping ? mapping.to : internalName, internalName, impl: NodeGeocoder(Object.assign({}, conf, sup)) })
   })
 
   return {
     capabilities () {
-      return [
-        { name: 'opendatafrance', source: [ 'municipality', 'locality', 'street', 'housenumber' ] },
-        { name: 'openstreetmap', source: [ 'default' ] }
-      ]
+      const caps = geocoders.map((geocoder) => geocoder.name)
+      return caps
     },
 
-    async forward (search) {
-      const requests = []
-      geocoders.forEach((geocoder) => {
-        requests.push(geocoder.geocode(search))
-      })
+    async forward (search, filter) {
+      const matchingSources = filter ? geocoders.filter((source) => minimatch(source.name, filter)) : geocoders
 
+      const requests = []
+      // issue requests to geocoders
+      for (const geocoder of matchingSources) {
+        const request = geocoder.impl.geocode(search)
+        request.source = geocoder
+        requests.push(request)
+      }
+
+      // wait for response and normalize results
       const response = []
       const results = await Promise.allSettled(requests)
-      results.forEach((result) => {
+      for (let i = 0; i < results.length; ++i) {
+        const result = results[i]
+        const source = requests[i].source
         if (result.status !== 'fulfilled') {
-          return
+          // skip failed results
+          debug(`request to ${source.internalName} failed: ${result.reason}`)
+          continue
         }
 
-        response.splice(-1, 0, ...result.value)
-      })
-
-      return response.map((entry) => {
-        // 'normalize' response
-        if (entry.provider === 'opendatafrance') {
-          // https://adresse.data.gouv.fr/api-doc/adresse
-          const props = _.omit(entry, [ 'latitude', 'longitude', 'provider' ])
-          const feat = { type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: [ entry.longitude, entry.latitude ] } }
-          const norm = {
-            provider: entry.provider,
-            source: entry.type,
-            feature: feat
+        for (const entry of result.value) {
+          // 'normalize' response
+          const norm = { source: source.name }
+          if (entry.provider === 'opendatafrance') {
+            // https://adresse.data.gouv.fr/api-doc/adresse
+            const props = _.omit(entry, [ 'latitude', 'longitude', 'provider' ])
+            norm.feature = { type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: [ entry.longitude, entry.latitude ] } }
+            if (entry.type === 'municipality') {
+              norm.matchProp = 'city'
+            } else if (entry.type === 'locality') {
+              norm.matchProp = 'streetName'
+            } else if (entry.type === 'street') {
+              norm.matchProp = 'streetName'
+            } else if (entry.type === 'housenumber') {
+              norm.matchProp = 'streetName'
+            }
+            norm.match = _.get(entry, norm.matchProp, 'foo')
+          } else if (entry.provider === 'openstreetmap') {
+            const props = _.omit(entry, [ 'latitude', 'longitude', 'provider' ])
+            norm.feature = { type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: [ entry.longitude, entry.latitude ] } }
+            norm.matchProp = 'formattedAddress'
+            norm.match = _.get(entry, norm.matchProp, 'foo')
+          } else {
+            debug(`Don't know how to normalize results from provider '${entry.provider}'`)
           }
-          if (entry.type === 'municipality') {
-            norm.matchProp = 'city'
-          } else if (entry.type === 'locality') {
-            norm.matchProp = 'streetName'
-          } else if (entry.type === 'street') {
-            norm.matchProp = 'streetName'
-          } else if (entry.type === 'housenumber') {
-            norm.matchProp = 'streetName'
-          }
-          norm.match = _.get(entry, norm.matchProp, 'foo')
-          return norm
-        } else if (entry.provider === 'openstreetmap') {
-          const props = _.omit(entry, [ 'latitude', 'longitude', 'provider' ])
-          const feat = { type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: [ entry.longitude, entry.latitude ] } }
-          const norm = {
-            provider: entry.provider,
-            source: entry.type,
-            feature: feat
-          }
-          norm.matchProp = 'foo'
-          norm.match = _.get(entry, norm.matchProp, 'foo')
-          return norm
-        } else {
-          debug(`Don't know how to normalize results from provider '${entry.provider}'`)
+          response.push(norm)
         }
+      }
 
-        return entry
-      })
+      return response
     },
 
     async reverse ({ lat, lon }) {
       const requests = []
       geocoders.forEach((geocoder) => {
-        requests.push(geocoder.reverse({ lat, lon }))
+        const request = geocoder.impl.reverse({ lat, lon })
+        request.source = geocoder
+        requests.push(request)
       })
 
       const response = []
       const results = await Promise.allSettled(requests)
-      results.forEach((result) => {
+      for (let i = 0; i < results.length; ++i) {
+        const result = results[i]
+        const source = requests[i].source
         if (result.status !== 'fulfilled') {
           return
         }
 
-        response.splice(-1, 0, ...result.value)
-      })
+        for (const entry of result.value) {
+          // 'normalize' response
+          const norm = { source: source.name }
+          if (entry.provider === 'opendatafrance') {
+            // https://adresse.data.gouv.fr/api-doc/adresse
+            const props = _.omit(entry, [ 'latitude', 'longitude', 'provider' ])
+            norm.feature = { type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: [ entry.longitude, entry.latitude ] } }
+          } else if (entry.provider === 'openstreetmap') {
+            const props = _.omit(entry, [ 'latitude', 'longitude', 'provider' ])
+            norm.feature = { type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: [ entry.longitude, entry.latitude ] } }
+          } else {
+            debug(`Don't know how to normalize results from provider '${entry.provider}'`)
+          }
 
-      return response.map((entry) => {
-        // 'normalize' response
-        if (entry.provider === 'opendatafrance') {
-          // https://adresse.data.gouv.fr/api-doc/adresse
-          const props = _.omit(entry, [ 'latitude', 'longitude', 'provider' ])
-          const feat = { type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: [ entry.longitude, entry.latitude ] } }
-          const norm = {
-            provider: entry.provider,
-            source: entry.type,
-            feature: feat
-          }
-          return norm
-        } else if (entry.provider === 'openstreetmap') {
-          const props = _.omit(entry, [ 'latitude', 'longitude', 'provider' ])
-          const feat = { type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: [ entry.longitude, entry.latitude ] } }
-          const norm = {
-            provider: entry.provider,
-            source: entry.type,
-            feature: feat
-          }
-          return norm
-        } else {
-          debug(`Don't know how to normalize results from provider '${entry.provider}'`)
+          response.push(norm)
         }
+      }
 
-        return entry
-      })
+      return response
     }
   }
 }

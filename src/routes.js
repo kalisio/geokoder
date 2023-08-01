@@ -49,10 +49,11 @@ export default async function (app) {
 
   app.get('/forward', async (req, res, next) => {
     const q = _.get(req.query, 'q')
+    const filter = _.get(req.query, 'sources', '*')
 
     const all = []
-    all.push(createKanoProvider(app).then((provider) => provider.forward(q)))
-    all.push(createNodeGeocoderProvider(app).then((provider) => provider.forward(q)))
+    all.push(createKanoProvider(app).then((provider) => provider.forward(q, filter)))
+    all.push(createNodeGeocoderProvider(app).then((provider) => provider.forward(q, filter)))
     const response = []
     const results = await Promise.allSettled(all)
     results.forEach((result) => {
@@ -62,7 +63,6 @@ export default async function (app) {
       result.value.forEach((entry) => {
         const normalized = entry.feature
         normalized.geokoder = {
-          provider: entry.provider,
           source: entry.source,
           match: entry.match,
           matchProp: entry.matchProp,
@@ -99,7 +99,6 @@ export default async function (app) {
         result.value.forEach((entry) => {
           const normalized = entry.feature
           normalized.geokoder = {
-            provider: entry.provider,
             source: entry.source,
             // TODO: score by distance ?
             // score: scoreResult(q.toUpperCase(), entry.match.toUpperCase())
