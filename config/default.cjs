@@ -2,7 +2,7 @@ const path = require('path')
 const winston = require('winston')
 
 const host = process.env.HOSTNAME || 'localhost'
-const port = process.env.PORT || 8091
+const port = process.env.PORT || 8080
 const apiPath = process.env.API_PREFIX || '/api'
 const baseUrl = process.env.BASE_URL || `http://${host}:${port}`
 
