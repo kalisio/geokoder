@@ -1,6 +1,7 @@
 # Using latest ubuntu as of now because using the default one (xenial)
 # the build fails in docker while running yarn install in the builder ...
 dist: jammy
+
 notifications:
   email: false
   slack:
@@ -8,6 +9,7 @@ notifications:
     on_failure: always
     rooms:
       secure: fRJLPN1XwquqO23+1NvlmdKzYbYSgr+6gbsU38r47JSre9i2EyWuza1N4g2IIiS7kkgY+Et2MRxgs4QglPhgasvbwtJJ/yVkpWnkxtWoJ9Uk/exFMGfvVt6GO9as5Hbw0h8uykyB58TjTNheDhfpP42mKAR3jusndYIsT+yVAcnNkD84qHVawoOZW4UA9tdzGFAh5y0Zv17cUIGhZ3OXgVr3rqKctXI3TxM2UYQfIhTn6FYCYuQpr9Xlq04ExXoMnzTrq0CL131eH5R0CWar9AL09M5To3iweh7mA1i3bfg0088CUxEcdodYM9m4By0Wa1QRUXUCtOGcqSS1ouhqfFjJpRFQiaGSigvDHv/52X2Ltx2RiYPS74gcR07t6o6F0KTwiWLNzgKAX12OXCPkYV+/tFB7Wli8ScodP9oCFCVNx/qjdaBCr9jlfnJ5X6q5eKE5qNXMN7ha4GwYkLm7aKLm5EEC9l4M0w4kAs9kCjE2wDUy1J5pbp9IE5g8oc+betpExJyw+LIQBsnzVwJQyGE4BGp06FtI4YHLOT9PlUMeT+89+CTKGFlXzy5WFLXD1yu8MgZV6OuiDe0tYDpef5e2VcKU8bVZlbHCRjXcSiqSnPo1RxzSHji62Ge+nqF728KTp/lBWgmbChByxhvAbKvQvU0aQ/XUbRIRr/ZSZJU=
+
 stages:
 - name: BUILD
   if: commit_message !~ /(skip[ _-]build)/
