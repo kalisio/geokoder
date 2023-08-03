@@ -6,6 +6,22 @@ import NodeGeocoder from 'node-geocoder'
 
 const debug = makeDebug('geokoder:providers')
 
+function getMappedName (renames, internalName) {
+  let regex = null
+  const mapping = renames.find((item) => {
+    if (!item.regex)
+      return item.from === internalName
+
+    const r = new RegExp(item.from)
+    const m = internalName.match(r)
+    if (m) regex = r
+    debug(`match ${item.from} on ${internalName} yields ${m ? m.join(','): 'nothing'}`)
+    return m != null
+  })
+  if (!mapping) return internalName
+  return mapping.regex ? internalName.replace(regex, mapping.to) : mapping.to
+}
+
 export async function createKanoProvider (app) {
   const apiPath = app.get('apiPath')
   const renames = app.get('renames')
@@ -30,7 +46,7 @@ export async function createKanoProvider (app) {
         const featureLabels = _.castArray(layer.featureLabel).map((prop) => `properties.${prop}`)
         const internalName = `kano:${collection}`
         const mapping = renames.find((item) => item.from === internalName)
-        sources.push({ name: mapping ? mapping.to : internalName, internalName, collection, keys: featureLabels })
+        sources.push({ name: getMappedName(renames, internalName), internalName, collection, keys: featureLabels })
       })
     }
   } catch (error) {
@@ -150,8 +166,7 @@ export async function createNodeGeocoderProvider (app) {
     }
 
     const internalName = conf.provider
-    const mapping = renames.find((item) => item.from === internalName)
-    geocoders.push({ name: mapping ? mapping.to : internalName, internalName, impl: NodeGeocoder(Object.assign({}, conf, sup)) })
+    geocoders.push({ name: getMappedName(renames, internalName), internalName, impl: NodeGeocoder(Object.assign({}, conf, sup)) })
   })
 
   return {
