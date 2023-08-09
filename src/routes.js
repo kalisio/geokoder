@@ -13,8 +13,21 @@ const debug = makeDebug('geokoder:routes')
 //  => sources = rte-units, hubeau-stations ...
 
 export default async function (app) {
+  const packageInfo = fs.readJsonSync(path.join(__dirname, '..', 'package.json'))
   const geocoders = app.get('geocoders')
   const apiPath = app.get('apiPath')
+
+  app.get(`/healthcheck`, (req, res, next) => {
+    const response = {
+      name: 'geokoder',
+      // Allow to override version number for custom build
+      version: (process.env.VERSION ? process.env.VERSION : packageInfo.version)
+    }
+    if (process.env.BUILD_NUMBER) {
+      response.buildNumber = process.env.BUILD_NUMBER
+    }
+    res.json(response)
+  })
 
   /*
   app.get('/providers', async (req, res, next) => {
