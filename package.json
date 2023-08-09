@@ -44,6 +44,7 @@
     "@feathersjs/feathers": "^5.0.0",
     "@kalisio/feathers-distributed": "^2.0.2",
     "cors": "^2.8.5",
+    "fs-extra": "^11.1.1",
     "lodash": "^4.17.21",
     "minimatch": "^9.0.3",
     "node-fetch": "^3.3.1",

@@ -1,3 +1,6 @@
+import { fileURLToPath } from 'url'
+import fs from 'fs-extra'
+import path from 'path'
 import _ from 'lodash'
 import makeDebug from 'debug'
 import { scoreResult } from './scoring.js'
@@ -13,6 +16,8 @@ const debug = makeDebug('geokoder:routes')
 //  => sources = rte-units, hubeau-stations ...
 
 export default async function (app) {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
   const packageInfo = fs.readJsonSync(path.join(__dirname, '..', 'package.json'))
   const geocoders = app.get('geocoders')
   const apiPath = app.get('apiPath')
