@@ -9,13 +9,32 @@
 
 **Kano geocoder service**
 
-**geokoder** is a service that let you perform forward and inverse geocoding in various source.
+**geokoder** is a service that let you perform forward and reverse geocoding in various sources.
 
 ## API
 
 ### /healthcheck (GET)
 
-Check for the health of the service
+Check for the health of the service, returns a json object with the name of the service (geokoder) and it's version number.
+
+### /capabilities (GET)
+
+Returns the list of available geocoding sources, as an array.
+
+### /forward?q=searchString&sources=filterPattern (GET)
+
+Performs forward geocoding. Requires at least the `q` parameter which is the string that'll be searched in the geocoding sources.
+The query supports an optional `sources` allowing users to only perform geocoding in matching sources. The source matching is based on [minimatch](https://github.com/isaacs/minimatch#minimatch).
+
+The query returns the list of matching features, as an array. Each feature is given a relevance score, and the returned array is sorted based on this value. The service also add to each feature and additional `geokoder` object containing the following fields:
+  - `source` specifies in which source this feature was found
+  - `match` indicates which string value was used to compute relevance score
+  - `matchProp` indicates which feature property was used to to compute relevance score
+  - `score` is the computed relevance score
+
+### /reverse?lat=latValue&lon=lonValue (GET)
+
+Performs reverse geocoding at the given point.
 
 ## Configuring
 
