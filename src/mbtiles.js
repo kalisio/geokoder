@@ -86,7 +86,6 @@ export async function createMBTilesProvider (app) {
           }], [lon, lat], {
             radius: 0, limit: 10, geometry: 'polygon', layers: dataset.layers.map(layer => layer.id)
           }, (err, result) => {
-            console.log(err)
             if (err) reject(err)
             else resolve(result)
           })
