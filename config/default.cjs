@@ -15,6 +15,11 @@ module.exports = {
     { provider: 'opendatafrance' },
     { provider: 'openstreetmap', headers: { 'user-agent': 'geokoder/0.1.0', referrer: '/forward' } }
   ],
+  MBTiles: [
+    // For performance reason each layer in the dataset should have the same max zoom level,
+    // if not two different providers should be created for now
+    { provider: 'admin-express', filepath: path.join(__dirname, '../data/mbtiles/admin-express.mbtiles'), layers: ['commune', 'departement'] }
+  ],
   renames: [
     { from: 'opendatafrance', to: 'ban' },
     { from: 'openstreetmap', to: 'nominatim' },

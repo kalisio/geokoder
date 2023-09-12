@@ -3,24 +3,11 @@ import makeDebug from 'debug'
 import { minimatch } from 'minimatch'
 import fetch from 'node-fetch'
 import NodeGeocoder from 'node-geocoder'
+import { getMappedName } from './utils.js'
+
+export { createMBTilesProvider } from './mbtiles.js'
 
 const debug = makeDebug('geokoder:providers')
-
-function getMappedName (renames, internalName) {
-  let regex = null
-  const mapping = renames.find((item) => {
-    if (!item.regex)
-      return item.from === internalName
-
-    const r = new RegExp(item.from)
-    const m = internalName.match(r)
-    if (m) regex = r
-    debug(`match ${item.from} on ${internalName} yields ${m ? m.join(','): 'nothing'}`)
-    return m != null
-  })
-  if (!mapping) return internalName
-  return mapping.regex ? internalName.replace(regex, mapping.to) : mapping.to
-}
 
 export async function createKanoProvider (app) {
   const apiPath = app.get('apiPath')

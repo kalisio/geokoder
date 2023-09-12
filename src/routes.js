@@ -4,7 +4,7 @@ import path from 'path'
 import _ from 'lodash'
 import makeDebug from 'debug'
 import { scoreResult } from './scoring.js'
-import { createKanoProvider, createNodeGeocoderProvider } from './providers.js'
+import { createKanoProvider, createNodeGeocoderProvider, createMBTilesProvider } from './providers.js'
 
 const debug = makeDebug('geokoder:routes')
 
@@ -52,12 +52,15 @@ export default async function (app) {
     const all = []
     all.push(createKanoProvider(app).then((provider) => provider.capabilities()))
     all.push(createNodeGeocoderProvider(app).then((provider) => provider.capabilities()))
+    all.push(createMBTilesProvider(app).then((provider) => provider.capabilities()))
 
     const response = []
     const results = await Promise.allSettled(all)
     results.forEach((result) => {
-      if (result.status !== 'fulfilled')
+      if (result.status !== 'fulfilled') {
+        app.logger.info(result.reason.toString())
         return
+      }
 
       response.splice(-1, 0, ...result.value)
     })
@@ -72,11 +75,14 @@ export default async function (app) {
     const all = []
     all.push(createKanoProvider(app).then((provider) => provider.forward(q, filter)))
     all.push(createNodeGeocoderProvider(app).then((provider) => provider.forward(q, filter)))
+    all.push(createMBTilesProvider(app).then((provider) => provider.forward(q, filter)))
     const response = []
     const results = await Promise.allSettled(all)
     results.forEach((result) => {
-      if (result.status !== 'fulfilled')
+      if (result.status !== 'fulfilled') {
+        app.logger.error(result.reason.toString())
         return
+      }
 
       result.value.forEach((entry) => {
         const normalized = entry.feature
@@ -108,11 +114,14 @@ export default async function (app) {
       const all = []
       all.push(createKanoProvider(app).then((provider) => provider.reverse({ lat, lon })))
       all.push(createNodeGeocoderProvider(app).then((provider) => provider.reverse({ lat, lon })))
+      all.push(createMBTilesProvider(app).then((provider) => provider.reverse({ lat, lon })))
       const response = []
       const results = await Promise.allSettled(all)
       results.forEach((result) => {
-        if (result.status !== 'fulfilled')
+        if (result.status !== 'fulfilled') {
+          app.logger.error(result.reason.toString())
           return
+        }
 
         result.value.forEach((entry) => {
           const normalized = entry.feature
