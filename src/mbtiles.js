@@ -2,7 +2,6 @@ import fs from 'fs'
 import util from 'util'
 import _ from 'lodash'
 import makeDebug from 'debug'
-import SphericalMercator from '@mapbox/sphericalmercator'
 import MBTiles from '@mapbox/mbtiles'
 import vtquery from '@mapbox/vtquery'
 import zlib from 'zlib'
@@ -57,8 +56,6 @@ export async function createMBTilesProvider (app) {
     async reverse ({ lat, lon }) {
       let responses = []
       for (const dataset of datasets) {
-        // FIXME: set options based on MBTiles metadata
-        const SM = new SphericalMercator()
         // Find tile for position
         // FIXME: we assume the same zoom level for all layers
         const z = _.get(dataset, 'layers[0].maxzoom')
@@ -98,7 +95,6 @@ export async function createMBTilesProvider (app) {
           const source = `${dataset.name}:${_.get(feature, 'properties.tilequery.layer')}`
           return Object.assign({ source }, { feature: _.omit(feature, ['properties.tilequery']) })
         }))
-        console.log(responses)
       }
       return responses
     }
