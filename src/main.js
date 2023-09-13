@@ -16,7 +16,7 @@ import middlewares from './middlewares.js'
 // Initialize debugger to be used in feathers
 feathers.setDebug(makeDebug)
 
-export default async function createServer () {
+export async function createServer () {
   const app = express(feathers())
 
   app.configure(configuration())

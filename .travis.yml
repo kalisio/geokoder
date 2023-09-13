@@ -13,8 +13,8 @@ notifications:
 stages:
 - name: BUILD
   if: commit_message !~ /(skip[ _-]build)/
-# - name: TEST
-#   if: commit_message !~ /(skip[ _-]test)/
+- name: TEST
+  if: commit_message !~ /(skip[ _-]test)/
 
 jobs:
   include:
@@ -24,19 +24,17 @@ jobs:
     - docker
     script:
     - bash .travis.build.sh
-  # - stage: TEST
-  #   language: node_js
-  #   node_js:
-  #   - '16'
-  #   services:
-  #   - mongodb
-  #   env:
-  #   - CC_TEST_REPORTER_ID=cb9e5fd27dd5cdf9d03f30ccf75908b8894434c8de670ecf5eb2d3c62a3c1124
-  #   install:
-  #   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-  #   - chmod +x ./cc-test-reporter
-  #   - "./cc-test-reporter before-build"
-  #   script:
-  #   - bash .travis.test.sh
-  #   after_script:
-  #   - "./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT"
+  - stage: TEST
+    language: node_js
+    node_js:
+    - '16'
+    env:
+    - CC_TEST_REPORTER_ID=db028d86210785c300155b473cba95a59dc3b0c0ababed2737389957372c2092
+    install:
+    - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+    - chmod +x ./cc-test-reporter
+    - "./cc-test-reporter before-build"
+    script:
+    - yarn test
+    after_script:
+    - "./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT"

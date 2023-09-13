@@ -14,17 +14,21 @@ export async function createKanoProvider (app) {
   const renames = app.get('renames')
 
   // use the catalog service to build a list of sources (ie. feature services we can use)
-  let sources = []
+  const sources = []
   try {
     const catalog = app.service(`${apiPath}/catalog`)
     if (catalog) {
       // we need layers with 'service' or 'probeService' and 'featureLabel' properties
       const layers = await catalog.find(
-        { paginate: false, query:
-          { $and: [
-            { $or: [{ service: { $exists: true } }, { probeService: { $exists: true } }] },
-            { featureLabel: { $exists: true } }
-          ] }
+        {
+          paginate: false,
+          query:
+          {
+            $and: [
+              { $or: [{ service: { $exists: true } }, { probeService: { $exists: true } }] },
+              { featureLabel: { $exists: true } }
+            ]
+          }
         })
       layers.forEach((layer) => {
         // use probeService in priority when available
@@ -32,7 +36,6 @@ export async function createKanoProvider (app) {
         // featureLabel refers to feature properties
         const featureLabels = _.castArray(layer.featureLabel).map((prop) => `properties.${prop}`)
         const internalName = `kano:${collection}`
-        const mapping = renames.find((item) => item.from === internalName)
         sources.push({ name: getMappedName(renames, internalName), internalName, collection, keys: featureLabels })
       })
     }
@@ -44,7 +47,7 @@ export async function createKanoProvider (app) {
 
   return {
     capabilities () {
-      const caps = sources.map((source) => source.name )
+      const caps = sources.map((source) => source.name)
       return caps
     },
 
@@ -52,7 +55,7 @@ export async function createKanoProvider (app) {
       const matchingSources = filter ? sources.filter((source) => minimatch(source.name, filter)) : sources
 
       // issue requests to discovered services
-      let requests = []
+      const requests = []
       for (const source of matchingSources) {
         try {
           const service = app.service(`${apiPath}/${source.collection}`)
@@ -88,7 +91,7 @@ export async function createKanoProvider (app) {
             // TODO: might not be this one
             matchProp: source.keys[0],
             // omit internal _id prop
-            feature: _.omit(feature, [ '_id' ]),
+            feature: _.omit(feature, ['_id'])
           })
         }
       }
@@ -97,9 +100,7 @@ export async function createKanoProvider (app) {
     },
 
     async reverse ({ lat, lon }) {
-      const point = { type: 'Feature', geometry: { type: 'Point', coordinates: [ lon, lat ] } }
-
-      let requests = []
+      const requests = []
       for (const source of sources) {
         try {
           const service = app.service(`${apiPath}/${source.collection}`)
@@ -125,11 +126,10 @@ export async function createKanoProvider (app) {
 
         const features = result.value.features
         for (const feature of features) {
-          const name = _.get(feature, source.keys[0])
           response.push({
             source: source.name,
             // omit internal _id prop
-            feature: _.omit(feature, [ '_id' ]),
+            feature: _.omit(feature, ['_id'])
           })
         }
       }
@@ -190,8 +190,8 @@ export async function createNodeGeocoderProvider (app) {
           const norm = { source: source.name }
           if (entry.provider === 'opendatafrance') {
             // https://adresse.data.gouv.fr/api-doc/adresse
-            const props = _.omit(entry, [ 'latitude', 'longitude', 'provider' ])
-            norm.feature = { type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: [ entry.longitude, entry.latitude ] } }
+            const props = _.omit(entry, ['latitude', 'longitude', 'provider'])
+            norm.feature = { type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: [entry.longitude, entry.latitude] } }
             if (entry.type === 'municipality') {
               norm.matchProp = 'city'
             } else if (entry.type === 'locality') {
@@ -203,8 +203,8 @@ export async function createNodeGeocoderProvider (app) {
             }
             norm.match = _.get(entry, norm.matchProp, 'foo')
           } else if (entry.provider === 'openstreetmap') {
-            const props = _.omit(entry, [ 'latitude', 'longitude', 'provider' ])
-            norm.feature = { type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: [ entry.longitude, entry.latitude ] } }
+            const props = _.omit(entry, ['latitude', 'longitude', 'provider'])
+            norm.feature = { type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: [entry.longitude, entry.latitude] } }
             norm.matchProp = 'formattedAddress'
             norm.match = _.get(entry, norm.matchProp, 'foo')
           } else {
@@ -239,11 +239,11 @@ export async function createNodeGeocoderProvider (app) {
           const norm = { source: source.name }
           if (entry.provider === 'opendatafrance') {
             // https://adresse.data.gouv.fr/api-doc/adresse
-            const props = _.omit(entry, [ 'latitude', 'longitude', 'provider' ])
-            norm.feature = { type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: [ entry.longitude, entry.latitude ] } }
+            const props = _.omit(entry, ['latitude', 'longitude', 'provider'])
+            norm.feature = { type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: [entry.longitude, entry.latitude] } }
           } else if (entry.provider === 'openstreetmap') {
-            const props = _.omit(entry, [ 'latitude', 'longitude', 'provider' ])
-            norm.feature = { type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: [ entry.longitude, entry.latitude ] } }
+            const props = _.omit(entry, ['latitude', 'longitude', 'provider'])
+            norm.feature = { type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: [entry.longitude, entry.latitude] } }
           } else {
             debug(`Don't know how to normalize results from provider '${entry.provider}'`)
           }

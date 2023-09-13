@@ -19,4 +19,4 @@ coverage
 node_modules/
 
 # Data
-data
+/data/

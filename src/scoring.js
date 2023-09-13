@@ -2,11 +2,9 @@
 // https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance
 
 function jaroSimilarity (s1, s2) {
-  if (s1.length === 0 || s2.length === 0)
-    return 0
+  if (s1.length === 0 || s2.length === 0) { return 0 }
 
-  if (s1 === s2)
-    return 1
+  if (s1 === s2) { return 1 }
 
   const range = Math.floor(Math.max(s1.length, s2.length) / 2) - 1
   const s1Flags = new Array(s1.length)
@@ -25,11 +23,10 @@ function jaroSimilarity (s1, s2) {
     }
   }
 
-  if (m === 0)
-    return 0
+  if (m === 0) { return 0 }
 
   // determine how many transpositions
-  let t = 0, j = 0
+  let t = 0; let j = 0
   for (let i = 0; i < s1.length && j < s2.length; ++i) {
     if (s1Flags[i] !== 1) continue
     while (s2Flags[j] !== 1) ++j

@@ -1,5 +1,3 @@
-import fs from 'fs'
-import util from 'util'
 import _ from 'lodash'
 import makeDebug from 'debug'
 import MBTiles from '@mapbox/mbtiles'
@@ -14,13 +12,13 @@ const debug = makeDebug('geokoder:providers:mbtiles')
 export async function createMBTilesProvider (app) {
   const config = app.get('MBTiles')
   const renames = app.get('renames')
-  
+
   const datasets = []
   for (let i = 0; i < config.length; i++) {
     const conf = config[i]
     const internalName = conf.provider
     const mbtiles = await new Promise((resolve, reject) => {
-      new MBTiles(`${conf.filepath}?mode=ro`, (err, mbtiles) => {
+      return new MBTiles(`${conf.filepath}?mode=ro`, (err, mbtiles) => {
         debug(`Loaded ${conf.filepath}`)
         if (err) reject(err)
         else resolve(mbtiles)
@@ -70,7 +68,7 @@ export async function createMBTilesProvider (app) {
           })
         })
         // For debug purpose
-        //fs.writeFileSync('test.mvt.gz', gzip)
+        // fs.writeFileSync('test.mvt.gz', gzip)
         const data = await new Promise((resolve, reject) => {
           zlib.unzip(gzip, (err, data) => {
             if (err) reject(err)
@@ -78,7 +76,7 @@ export async function createMBTilesProvider (app) {
           })
         })
         // For debug purpose
-        //fs.writeFileSync('test.mvt', data)
+        // fs.writeFileSync('test.mvt', data)
         // Then return a feature
         const geoJson = await new Promise((resolve, reject) => {
           vtquery([{
