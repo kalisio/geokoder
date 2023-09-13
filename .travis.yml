@@ -35,6 +35,7 @@ jobs:
     - chmod +x ./cc-test-reporter
     - "./cc-test-reporter before-build"
     script:
+    - yarn install
     - yarn test
     after_script:
     - "./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT"
