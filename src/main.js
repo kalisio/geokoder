@@ -8,6 +8,7 @@ import feathers from '@feathersjs/feathers'
 import configuration from '@feathersjs/configuration'
 import express from '@feathersjs/express'
 import distribution from '@kalisio/feathers-distributed'
+import { Providers } from './providers.js'
 import hooks from './hooks.js'
 import routes from './routes.js'
 import channels from './channels.js'
@@ -15,6 +16,8 @@ import middlewares from './middlewares.js'
 
 // Initialize debugger to be used in feathers
 feathers.setDebug(makeDebug)
+
+const debug = makeDebug('geokoder:main')
 
 export async function createServer () {
   const app = express(feathers())
@@ -30,7 +33,7 @@ export async function createServer () {
   // Set up real-time event channels
   app.configure(channels)
   // Configure API routes
-  await app.configure(routes)
+  app.configure(routes)
   // Configure middlewares - always has to be last
   app.configure(middlewares)
 
@@ -57,6 +60,9 @@ export async function createServer () {
   const server = await app.listen(port)
   server.app = app
   server.app.logger.info('Server started listening')
+
+  await Providers.initialize(app)
+  debug('Providers initialized', _.map(Providers.get(), 'name'))
 
   return server
 }

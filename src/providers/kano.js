@@ -3,7 +3,7 @@ import makeDebug from 'debug'
 import { minimatch } from 'minimatch'
 import { getMappedName } from '../utils.js'
 
-const debug = makeDebug('geokoder:providers')
+const debug = makeDebug('geokoder:providers:kano')
 
 export async function createKanoProvider (app) {
   const apiPath = app.get('apiPath')
@@ -58,10 +58,11 @@ export async function createKanoProvider (app) {
     },
 
     async forward (search, filter) {
-      const matchingSources = filter ? sources.filter((source) => minimatch(source.name, filter)) : sources
+      const matchingSources = sources.filter((source) => minimatch(source.name, filter))
 
       // issue requests to discovered services
       const requests = []
+      debug(`requesting ${matchingSources.length} matching sources`, matchingSources)
       for (const source of matchingSources) {
         try {
           const service = app.service(`${apiPath}/${source.collection}`)
@@ -105,9 +106,12 @@ export async function createKanoProvider (app) {
       return response
     },
 
-    async reverse ({ lat, lon }) {
+    async reverse ({ lat, lon, filter }) {
+      const matchingSources = sources.filter((source) => minimatch(source.name, filter))
+
       const requests = []
-      for (const source of sources) {
+      debug(`requesting ${matchingSources.length} matching sources`, matchingSources)
+      for (const source of matchingSources) {
         try {
           const service = app.service(`${apiPath}/${source.collection}`)
           const query = { latitude: lat, longitude: lon, distance: 1000 }

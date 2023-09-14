@@ -32,9 +32,14 @@ The query returns the list of matching features, as an array. Each feature is gi
   - `matchProp` indicates which feature property was used to to compute relevance score
   - `score` is the computed relevance score
 
-### /reverse?lat=latValue&lon=lonValue (GET)
+### /reverse?lat=latValue&lon=lonValue&sources=filterPattern (GET)
 
-Performs reverse geocoding at the given point.
+Performs reverse geocoding at the given point. Requires at least the `lat` and `lon` parameters which is the location that'll be searched in the geocoding sources. The query supports an optional `sources` allowing users to only perform reverse geocoding in matching sources. The source matching is based on [minimatch](https://github.com/isaacs/minimatch#minimatch). Some providers could support additional parameters:
+  - `limit` the number of maximum items to get in the response
+  - `radius` the maximum distance of items to be included in the response (useful for nearby location query not for point in polygon query)
+
+The query returns the list of matching features, as an array. The service also add to each feature and additional `geokoder` object containing the following fields:
+  - `source` specifies in which source this feature was found
 
 ## Configuring
 

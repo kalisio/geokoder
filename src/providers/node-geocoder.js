@@ -5,7 +5,7 @@ import fetch from 'node-fetch'
 import NodeGeocoder from 'node-geocoder'
 import { getMappedName } from '../utils.js'
 
-const debug = makeDebug('geokoder:providers')
+const debug = makeDebug('geokoder:providers:node-geocoder')
 
 export async function createNodeGeocoderProvider (app) {
   const config = app.get('NodeGeocoder')
@@ -28,17 +28,18 @@ export async function createNodeGeocoderProvider (app) {
 
   return {
     name: 'NodeGeocoder',
-    
+
     capabilities () {
       const caps = geocoders.map((geocoder) => geocoder.name)
       return caps
     },
 
     async forward (search, filter) {
-      const matchingSources = filter ? geocoders.filter((source) => minimatch(source.name, filter)) : geocoders
+      const matchingSources = geocoders.filter(geocoder => minimatch(geocoder.name, filter))
 
       const requests = []
       // issue requests to geocoders
+      debug(`requesting ${matchingSources.length} matching sources`, matchingSources)
       for (const geocoder of matchingSources) {
         const request = geocoder.impl.geocode(search)
         request.source = geocoder
@@ -89,13 +90,17 @@ export async function createNodeGeocoderProvider (app) {
       return response
     },
 
-    async reverse ({ lat, lon }) {
+    async reverse ({ lat, lon, filter }) {
+      const matchingSources = geocoders.filter(geocoder => minimatch(geocoder.name, filter))
+
       const requests = []
-      geocoders.forEach((geocoder) => {
+      // issue requests to geocoders
+      debug(`requesting ${matchingSources.length} matching sources`, matchingSources)
+      for (const geocoder of matchingSources) {
         const request = geocoder.impl.reverse({ lat, lon })
         request.source = geocoder
         requests.push(request)
-      })
+      }
 
       const response = []
       const results = await Promise.allSettled(requests)

@@ -2,11 +2,12 @@ import { fileURLToPath } from 'url'
 import fs from 'fs-extra'
 import path from 'path'
 import _ from 'lodash'
-// import makeDebug from 'debug'
+import errors from '@feathersjs/errors'
+import makeDebug from 'debug'
 import { scoreResult } from './scoring.js'
-import { createKanoProvider, createNodeGeocoderProvider, createMBTilesProvider } from './providers.js'
+import { Providers } from './providers.js'
 
-// const debug = makeDebug('geokoder:routes')
+const debug = makeDebug('geokoder:routes')
 
 // provider
 //  => liste de sources
@@ -15,7 +16,7 @@ import { createKanoProvider, createNodeGeocoderProvider, createMBTilesProvider }
 // kano feature services = provider
 //  => sources = rte-units, hubeau-stations ...
 
-export default async function (app) {
+export default function (app) {
   const __filename = fileURLToPath(import.meta.url)
   const __dirname = path.dirname(__filename)
   const packageInfo = fs.readJsonSync(path.join(__dirname, '..', 'package.json'))
@@ -33,16 +34,13 @@ export default async function (app) {
   })
 
   app.get('/capabilities', async (req, res, next) => {
-    const all = []
-    all.push(createKanoProvider(app).then((provider) => provider.capabilities()))
-    all.push(createNodeGeocoderProvider(app).then((provider) => provider.capabilities()))
-    all.push(createMBTilesProvider(app).then((provider) => provider.capabilities()))
+    const all = Providers.get().map(provider => provider.capabilities())
 
     const response = []
     const results = await Promise.allSettled(all)
     results.forEach((result) => {
       if (result.status !== 'fulfilled') {
-        app.logger.info(result.reason.toString())
+        app.logger.error(result.reason.toString())
         return
       }
 
@@ -55,11 +53,8 @@ export default async function (app) {
   app.get('/forward', async (req, res, next) => {
     const q = _.get(req.query, 'q')
     const filter = _.get(req.query, 'sources', '*')
+    const all = Providers.get().map(provider => provider.forward(q, filter))
 
-    const all = []
-    all.push(createKanoProvider(app).then((provider) => provider.forward(q, filter)))
-    all.push(createNodeGeocoderProvider(app).then((provider) => provider.forward(q, filter)))
-    all.push(createMBTilesProvider(app).then((provider) => provider.forward(q, filter)))
     const response = []
     const results = await Promise.allSettled(all)
     results.forEach((result) => {
@@ -93,14 +88,17 @@ export default async function (app) {
   })
 
   app.get('/reverse', async (req, res, next) => {
-    const lat = parseFloat(_.get(req.query, 'lat'))
-    const lon = parseFloat(_.get(req.query, 'lon'))
+    const lat = _.toNumber(_.get(req.query, 'lat'))
+    const lon = _.toNumber(_.get(req.query, 'lon'))
 
     if (_.isFinite(lat) && _.isFinite(lon)) {
-      const all = []
-      all.push(createKanoProvider(app).then((provider) => provider.reverse({ lat, lon })))
-      all.push(createNodeGeocoderProvider(app).then((provider) => provider.reverse({ lat, lon })))
-      all.push(createMBTilesProvider(app).then((provider) => provider.reverse({ lat, lon })))
+      const options = { lat, lon, filter: _.get(req.query, 'sources', '*') }
+      // Some providers might support additional parameters
+      if (_.has(req.query, 'radius')) options.radius = _.toNumber(_.get(req.query, 'radius'))
+      if (_.has(req.query, 'limit')) options.limit = _.toInteger(_.get(req.query, 'limit'))
+      
+      const all = Providers.get().map(provider => provider.reverse(options))
+
       const response = []
       const results = await Promise.allSettled(all)
       results.forEach((result) => {
@@ -122,7 +120,7 @@ export default async function (app) {
 
       res.json(response)
     } else {
-      // TODO: ?
+      throw new errors.BadRequest('Reverse geocoding expect decimal numbers for longitude and latitude')
     }
   })
 }

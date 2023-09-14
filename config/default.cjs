@@ -16,9 +16,9 @@ module.exports = {
     { provider: 'openstreetmap', headers: { 'user-agent': 'geokoder/0.1.0', referrer: '/forward' } }
   ],
   MBTiles: [
-    // For performance reason each layer in the dataset should have the same max zoom level,
-    // if not two different providers should be created for now
-    { provider: 'admin-express', filepath: path.join(__dirname, '../data/mbtiles/admin-express.mbtiles'), layers: ['commune', 'departement'] }
+    // For performance reason each layer in a dataset should have the same max zoom level, if not two different providers should be created for now
+    // Create a local.cjs file with your own data to test it as we don't provide any default datasets
+    //{ dataset: 'admin-express', filepath: path.join(__dirname, '../data/mbtiles/admin-express.mbtiles'), layers: ['commune', 'departement'] }
   ],
   renames: [
     { from: 'opendatafrance', to: 'ban' },
@@ -43,6 +43,7 @@ module.exports = {
   },
   distribution: { // Distribute no services simply use remote ones from Kano
     services: (service) => false,
+    // Use only Kano services
     remoteServices: (service) => (service.key === 'kano'),
     healthcheckPath: apiPath + '/distribution/'
   }

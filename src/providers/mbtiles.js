@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import makeDebug from 'debug'
+import { minimatch } from 'minimatch'
 import MBTiles from '@mapbox/mbtiles'
 import vtquery from '@mapbox/vtquery'
 import zlib from 'zlib'
@@ -16,7 +17,6 @@ export async function createMBTilesProvider (app) {
   const datasets = []
   for (let i = 0; i < config.length; i++) {
     const conf = config[i]
-    const internalName = conf.provider
     const mbtiles = await new Promise((resolve, reject) => {
       return new MBTiles(`${conf.filepath}?mode=ro`, (err, mbtiles) => {
         debug(`Loaded ${conf.filepath}`)
@@ -32,30 +32,40 @@ export async function createMBTilesProvider (app) {
     })
     debug(`Metadata for ${conf.filepath}`, metadata)
     datasets.push({
-      name: getMappedName(renames, internalName),
-      internalName,
+      name: conf.dataset,
       mbtiles,
       layers: metadata.vector_layers.filter(layer => conf.layers.includes(layer.id))
     })
   }
 
-  debug(`MBTiles provider: found ${datasets.length} sources`)
+  debug(`MBTiles provider: found ${datasets.length} datasets`)
 
   return {
     name: 'MBTiles',
-    
+
     capabilities () {
-      const caps = datasets.map((file) => file.name)
-      return caps
+      return _.reduce(datasets,
+        (sources, dataset) => sources.concat(dataset.layers.map(layer => getMappedName(renames, `${dataset.name}:${layer.id}`))),
+        [])
     },
 
     async forward (search, filter) {
       throw new Error('Not supported')
     },
 
-    async reverse ({ lat, lon }) {
+    async reverse ({ lat, lon, filter, radius, limit }) {
+      const matchingDatasets = datasets.filter(dataset => {
+        // Check if dataset has at least a matching layer
+        for (const layer of dataset.layers) {
+          const name = getMappedName(renames, `${dataset.name}:${layer.id}`)
+          if (minimatch(name, filter || '*')) return true
+        }
+        return false
+      })
+
       let responses = []
-      for (const dataset of datasets) {
+      debug(`requesting ${matchingDatasets.length} matching datasets`, matchingDatasets)
+      for (const dataset of matchingDatasets) {
         // Find tile for position
         // FIXME: we assume the same zoom level for all layers
         const z = _.get(dataset, 'layers[0].maxzoom')
@@ -84,7 +94,11 @@ export async function createMBTilesProvider (app) {
           vtquery([{
             buffer: data, x, y, z
           }], [lon, lat], {
-            radius: 0, limit: 10, geometry: 'polygon', layers: dataset.layers.map(layer => layer.id)
+            // Defaults to "point in polygon" query, otherwise specify a radius to search for nearby locations
+            radius: _.isNil(radius) ? 0 : radius,
+            limit: _.isNil(limit) ? 10 : limit,
+            // Take filter into account
+            layers: dataset.layers.filter(layer => minimatch(getMappedName(renames, `${dataset.name}:${layer.id}`), filter)).map(layer => layer.id)
           }, (err, result) => {
             if (err) reject(err)
             else resolve(result)
