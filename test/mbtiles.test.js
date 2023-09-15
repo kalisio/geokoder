@@ -12,9 +12,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 describe('geokoder:mbtiles', () => {
   let server, app
   const locations = [
-    { lat: 43.31091, lon: 1.94750, radius: 0, sources: 'mairies', results: [] },
-    { lat: 43.31091, lon: 1.94750, radius: 1000, sources: 'mairies', results: ['Castelnaudary'] },
-    { lat: 43.31091, lon: 1.94750, radius: 0, sources: 'epci', results: ['CC Castelnaudary Lauragais Audois'] }
+    { lat: 43.31091, lon: 1.94750, distance: 0, sources: 'mairies', results: [] },
+    { lat: 43.31091, lon: 1.94750, distance: 1000, sources: 'mairies', results: ['Castelnaudary'] },
+    { lat: 43.31091, lon: 1.94750, distance: 0, sources: 'epci', results: ['CC Castelnaudary Lauragais Audois'] }
   ]
 
   before(() => {
@@ -47,7 +47,7 @@ describe('geokoder:mbtiles', () => {
     for (let i = 0; i < locations.length; i++) {
       const location = locations[i]
       const response = await superagent
-        .get(`${app.get('baseUrl')}/reverse?lat=${location.lat}&lon=${location.lon}&radius=${location.radius}&sources=${location.sources}`)
+        .get(`${app.get('baseUrl')}/reverse?lat=${location.lat}&lon=${location.lon}&distance=${location.distance}&sources=${location.sources}`)
       expect(response.body.length).to.equal(location.results.length)
       response.body.forEach((feature, index) => {
         expect(_.get(feature, 'properties.nom', '')).to.equal(location.results[index])

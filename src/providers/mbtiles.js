@@ -74,7 +74,7 @@ export async function createMBTilesProvider (app) {
         // Load tile
         const gzip = await new Promise((resolve, reject) => {
           dataset.mbtiles.getTile(z, x, y, (err, data, headers) => {
-            debug(`Retrieved tile ${x}, ${y}, ${z}`)
+            debug(`Retrieved tile ${x}, ${y}, ${z} for location (${lon}, ${lat})`)
             if (err) reject(err)
             else resolve(data)
           })
@@ -89,16 +89,18 @@ export async function createMBTilesProvider (app) {
         })
         // For debug purpose
         // fs.writeFileSync('test.mvt', data)
+        // Take filter into account
+        const layers = dataset.layers.filter(layer => minimatch(getMappedName(renames, `${dataset.name}:${layer.id}`), filter)).map(layer => layer.id)
+        // Defaults to "point in polygon" query, otherwise specify a distance to search for nearby locations
+        const radius = _.isNil(distance) ? 0 : distance
+        limit = _.isNil(limit) ? 10 : limit
+        debug(`Requesting layers ${layers} with radius ${radius} and limit ${limit}`)
         // Then return a feature
         const geoJson = await new Promise((resolve, reject) => {
           vtquery([{
             buffer: data, x, y, z
           }], [lon, lat], {
-            // Defaults to "point in polygon" query, otherwise specify a distance to search for nearby locations
-            radius: _.isNil(distance) ? 0 : distance,
-            limit: _.isNil(limit) ? 10 : limit,
-            // Take filter into account
-            layers: dataset.layers.filter(layer => minimatch(getMappedName(renames, `${dataset.name}:${layer.id}`), filter)).map(layer => layer.id)
+            radius, limit, layers
           }, (err, result) => {
             if (err) reject(err)
             else resolve(result)
