@@ -39,7 +39,6 @@ describe('geokoder:mbtiles', () => {
       .get(`${app.get('baseUrl')}/capabilities`)
     expect(response.body.includes('mairies')).beTrue()
     expect(response.body.includes('epci')).beTrue()
-    console.log(response.body)
   })
   // Let enough time to process
     .timeout(10000)

@@ -94,7 +94,7 @@ export default function (app) {
     if (_.isFinite(lat) && _.isFinite(lon)) {
       const options = { lat, lon, filter: _.get(req.query, 'sources', '*') }
       // Some providers might support additional parameters
-      if (_.has(req.query, 'radius')) options.radius = _.toNumber(_.get(req.query, 'radius'))
+      if (_.has(req.query, 'distance')) options.distance = _.toNumber(_.get(req.query, 'distance'))
       if (_.has(req.query, 'limit')) options.limit = _.toInteger(_.get(req.query, 'limit'))
       
       const all = Providers.get().map(provider => provider.reverse(options))

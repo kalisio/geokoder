@@ -36,7 +36,7 @@ The query returns the list of matching features, as an array. Each feature is gi
 
 Performs reverse geocoding at the given point. Requires at least the `lat` and `lon` parameters which is the location that'll be searched in the geocoding sources. The query supports an optional `sources` allowing users to only perform reverse geocoding in matching sources. The source matching is based on [minimatch](https://github.com/isaacs/minimatch#minimatch). Some providers could support additional parameters:
   - `limit` the number of maximum items to get in the response
-  - `radius` the maximum distance of items to be included in the response (useful for nearby location query not for point in polygon query)
+  - `distance` the maximum distance of items to be included in the response (useful for nearby location query not for point in polygon query)
 
 The query returns the list of matching features, as an array. The service also add to each feature and additional `geokoder` object containing the following fields:
   - `source` specifies in which source this feature was found
@@ -57,6 +57,8 @@ You can build the image with the following command:
 ```bash
 docker build -t <your-image-name> .
 ```
+
+You can build a sample MBTiles with sources from [French API Géo](https://github.com/etalab/api-geo) for testing purpose using the provided script after you installed [tippecanoe](https://github.com/mapbox/tippecanoe).
 
 ### Automatic build using Travis CI
 

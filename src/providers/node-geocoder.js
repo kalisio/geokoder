@@ -39,7 +39,7 @@ export async function createNodeGeocoderProvider (app) {
 
       const requests = []
       // issue requests to geocoders
-      debug(`requesting ${matchingSources.length} matching sources`, matchingSources)
+      debug(`requesting ${matchingSources.length} matching sources`, _.map(matchingSources, 'name'))
       for (const geocoder of matchingSources) {
         const request = geocoder.impl.geocode(search)
         request.source = geocoder
@@ -95,7 +95,7 @@ export async function createNodeGeocoderProvider (app) {
 
       const requests = []
       // issue requests to geocoders
-      debug(`requesting ${matchingSources.length} matching sources`, matchingSources)
+      debug(`requesting ${matchingSources.length} matching sources`, _.map(matchingSources, 'name'))
       for (const geocoder of matchingSources) {
         const request = geocoder.impl.reverse({ lat, lon })
         request.source = geocoder
@@ -111,6 +111,8 @@ export async function createNodeGeocoderProvider (app) {
           return
         }
 
+        
+        debug(`retrieved ${result.value.length} entries from source ${source.name}`)
         for (const entry of result.value) {
           // 'normalize' response
           const norm = { source: source.name }

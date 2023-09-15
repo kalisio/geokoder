@@ -53,7 +53,7 @@ export async function createMBTilesProvider (app) {
       throw new Error('Not supported')
     },
 
-    async reverse ({ lat, lon, filter, radius, limit }) {
+    async reverse ({ lat, lon, filter, distance, limit }) {
       const matchingDatasets = datasets.filter(dataset => {
         // Check if dataset has at least a matching layer
         for (const layer of dataset.layers) {
@@ -64,7 +64,7 @@ export async function createMBTilesProvider (app) {
       })
 
       let responses = []
-      debug(`requesting ${matchingDatasets.length} matching datasets`, matchingDatasets)
+      debug(`requesting ${matchingDatasets.length} matching datasets`, _.map(matchingDatasets, 'name'))
       for (const dataset of matchingDatasets) {
         // Find tile for position
         // FIXME: we assume the same zoom level for all layers
@@ -94,8 +94,8 @@ export async function createMBTilesProvider (app) {
           vtquery([{
             buffer: data, x, y, z
           }], [lon, lat], {
-            // Defaults to "point in polygon" query, otherwise specify a radius to search for nearby locations
-            radius: _.isNil(radius) ? 0 : radius,
+            // Defaults to "point in polygon" query, otherwise specify a distance to search for nearby locations
+            radius: _.isNil(distance) ? 0 : distance,
             limit: _.isNil(limit) ? 10 : limit,
             // Take filter into account
             layers: dataset.layers.filter(layer => minimatch(getMappedName(renames, `${dataset.name}:${layer.id}`), filter)).map(layer => layer.id)
@@ -104,10 +104,12 @@ export async function createMBTilesProvider (app) {
             else resolve(result)
           })
         })
-        responses = responses.concat(geoJson.features.map(feature => {
+        const features = geoJson.features.map(feature => {
           const source = `${dataset.name}:${_.get(feature, 'properties.tilequery.layer')}`
           return Object.assign({ source }, { feature: _.omit(feature, ['properties.tilequery']) })
-        }))
+        })
+        responses = responses.concat(features)
+        debug(`retrieved ${features.length} features from dataset ${dataset.name}`)
       }
       return responses
     }

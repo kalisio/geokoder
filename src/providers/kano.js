@@ -62,7 +62,7 @@ export async function createKanoProvider (app) {
 
       // issue requests to discovered services
       const requests = []
-      debug(`requesting ${matchingSources.length} matching sources`, matchingSources)
+      debug(`requesting ${matchingSources.length} matching sources`, _.map(matchingSources, 'name'))
       for (const source of matchingSources) {
         try {
           const service = app.service(`${apiPath}/${source.collection}`)
@@ -106,15 +106,16 @@ export async function createKanoProvider (app) {
       return response
     },
 
-    async reverse ({ lat, lon, filter }) {
+    async reverse ({ lat, lon, filter, distance, limit }) {
       const matchingSources = sources.filter((source) => minimatch(source.name, filter))
 
       const requests = []
-      debug(`requesting ${matchingSources.length} matching sources`, matchingSources)
+      debug(`requesting ${matchingSources.length} matching sources`, _.map(matchingSources, 'name'))
       for (const source of matchingSources) {
         try {
           const service = app.service(`${apiPath}/${source.collection}`)
-          const query = { latitude: lat, longitude: lon, distance: 1000 }
+          const query = { latitude: lat, longitude: lon, distance }
+          if (!_.isNil(limit)) query.$limit = limit
           const request = service.find({ query })
           request.source = source
           requests.push(request)
@@ -135,6 +136,7 @@ export async function createKanoProvider (app) {
         }
 
         const features = result.value.features
+        debug(`retrieved ${features.length} features from source ${source.name}`)
         for (const feature of features) {
           response.push({
             source: source.name,
