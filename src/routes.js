@@ -53,7 +53,7 @@ export default function (app) {
   app.get('/forward', async (req, res, next) => {
     const q = _.get(req.query, 'q')
     const filter = _.get(req.query, 'sources', '*')
-    const all = Providers.get().map(provider => provider.forward(q, filter))
+    const all = Providers.get().filter(provider => typeof provider.forward === 'function').map(provider => provider.forward(q, filter))
 
     const response = []
     const results = await Promise.allSettled(all)
@@ -97,7 +97,7 @@ export default function (app) {
       if (_.has(req.query, 'distance')) options.distance = _.toNumber(_.get(req.query, 'distance'))
       if (_.has(req.query, 'limit')) options.limit = _.toInteger(_.get(req.query, 'limit'))
       
-      const all = Providers.get().map(provider => provider.reverse(options))
+      const all = Providers.get().filter(provider => typeof provider.reverse === 'function').map(provider => provider.reverse(options))
 
       const response = []
       const results = await Promise.allSettled(all)

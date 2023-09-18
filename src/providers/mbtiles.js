@@ -49,10 +49,6 @@ export async function createMBTilesProvider (app) {
         [])
     },
 
-    async forward (search, filter) {
-      throw new Error('Not supported')
-    },
-
     async reverse ({ lat, lon, filter, distance, limit }) {
       const matchingDatasets = datasets.filter(dataset => {
         // Check if dataset has at least a matching layer
