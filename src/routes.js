@@ -33,8 +33,10 @@ export default function (app) {
     res.json(response)
   })
 
-  app.get('/capabilities', async (req, res, next) => {
-    const all = Providers.get().map(provider => provider.capabilities())
+  app.get('/capabilities/:operation', async (req, res, next) => {
+    const operation = _.get(req, 'params.operation')
+    
+    const all = Providers.get().filter(provider => typeof provider[operation] === 'function').map(provider => provider.capabilities())
 
     const response = []
     const results = await Promise.allSettled(all)
