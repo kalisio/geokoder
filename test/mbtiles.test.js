@@ -35,8 +35,12 @@ describe('geokoder:mbtiles', () => {
     .timeout(10000)
 
   it('mbtiles sources appear in capabilities', async () => {
-    const response = await superagent
-      .get(`${app.get('baseUrl')}/capabilities`)
+    let response = await superagent
+      .get(`${app.get('baseUrl')}/capabilities/forward`)
+    expect(response.body.includes('mairies')).beFalse()
+    expect(response.body.includes('epci')).beFalse()
+    response = await superagent
+      .get(`${app.get('baseUrl')}/capabilities/reverse`)
     expect(response.body.includes('mairies')).beTrue()
     expect(response.body.includes('epci')).beTrue()
   })
