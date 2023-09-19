@@ -26,7 +26,7 @@ module.exports = {
     { from: 'kano:hubeau-(.*)', to: 'hubeau:$1', regex: true },
     { from: 'kano:([^-]*)-sensors', to: '$1', regex: true },
     { from: 'kano:([^-]*)-stations', to: '$1', regex: true },
-    { from: 'kano:([^-]*)-units', to: '$1', regex: true },
+    { from: 'kano:([^-]*)-units', to: '$1', regex: true }
   ],
   logs: {
     Console: {
