@@ -24,7 +24,8 @@ export const Providers = {
         return
       }
 
-      this.providers.push(result.value)
+      if (result.value)
+        this.providers.push(result.value)
     })
   },
   get () {

@@ -1,13 +1,16 @@
 import _ from 'lodash'
 import makeDebug from 'debug'
 import { minimatch } from 'minimatch'
-import { getMappedName } from '../utils.js'
 
 const debug = makeDebug('geokoder:providers:kano')
 
 export async function createKanoProvider (app) {
+  const providers = app.get('providers')
+  const config = _.get(providers, 'Kano')
+  if (!config)
+    return null
+
   const apiPath = app.get('apiPath')
-  const renames = app.get('renames')
   // Available sources from Kano catalog
   let sources = []
 
@@ -34,8 +37,7 @@ export async function createKanoProvider (app) {
           const collection = _.get(layer, 'probeService', layer.service)
           // featureLabel refers to feature properties
           const featureLabels = _.castArray(layer.featureLabel).map((prop) => `properties.${prop}`)
-          const internalName = `kano:${collection}`
-          sources.push({ name: getMappedName(renames, internalName), internalName, collection, keys: featureLabels })
+          sources.push({ name: `kano:${collection}`, collection, keys: featureLabels })
         })
       }
       debug(`Kano provider: found ${sources.length} sources`)

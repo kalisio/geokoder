@@ -3,25 +3,29 @@ import makeDebug from 'debug'
 import { minimatch } from 'minimatch'
 import fetch from 'node-fetch'
 import NodeGeocoder from 'node-geocoder'
-import { getMappedName } from '../utils.js'
 
 const debug = makeDebug('geokoder:providers:node-geocoder')
 
 export async function createNodeGeocoderProvider (app) {
-  const config = app.get('NodeGeocoder')
-  const renames = app.get('renames')
+  const providers = app.get('providers')
+  const config = _.get(providers, 'NodeGeocoder')
+  if (!config)
+    return null
 
   const geocoders = []
-  config.forEach((conf) => {
-    const sup = {}
-    if (conf.headers) {
-      sup.fetch = (url, options) => {
-        return fetch(url, { ...options, headers: conf.headers })
+  _.keys(config).forEach((key) => {
+    if (config[key]) {
+      const sup = {}
+      if (key === 'openstreetmap') {
+        // openstreetmap geocoder require either a valid HTTP-referer or User-Agent
+        // see https://operations.osmfoundation.org/policies/nominatim/
+        sup.fetch = (url, options) => {
+          return fetch(url, { ...options, headers: { 'user-agent': `geokoder/0.1.0`} })
+        }
       }
-    }
 
-    const internalName = conf.provider
-    geocoders.push({ name: getMappedName(renames, internalName), internalName, impl: NodeGeocoder(Object.assign({}, conf, sup)) })
+      geocoders.push({ name: key, impl: NodeGeocoder(Object.assign({ provider: key }, sup)) })
+    }
   })
 
   debug(`NodeGeocoder provider: found ${geocoders.length} geocoders`)
@@ -54,7 +58,7 @@ export async function createNodeGeocoderProvider (app) {
         const source = requests[i].source
         if (result.status !== 'fulfilled') {
           // skip failed results
-          debug(`request to ${source.internalName} failed: ${result.reason}`)
+          debug(`request to ${source.name} failed: ${result.reason}`)
           continue
         }
 

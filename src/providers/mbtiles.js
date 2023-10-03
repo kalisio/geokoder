@@ -4,19 +4,21 @@ import { minimatch } from 'minimatch'
 import MBTiles from '@mapbox/mbtiles'
 import vtquery from '@mapbox/vtquery'
 import zlib from 'zlib'
-import { getMappedName, long2tile, lat2tile } from '../utils.js'
+import { long2tile, lat2tile } from '../utils.js'
 
 // http://localhost:8080/reverse?lat=43.31091&lon=1.94750
 
 const debug = makeDebug('geokoder:providers:mbtiles')
 
 export async function createMBTilesProvider (app) {
-  const config = app.get('MBTiles')
-  const renames = app.get('renames')
+  const providers = app.get('providers')
+  const config = _.get(providers, 'MBTiles')
+  if (!config)
+    return null
 
   const datasets = []
-  for (let i = 0; i < config.length; i++) {
-    const conf = config[i]
+  _.keys(config).forEach(async (key) => {
+    const conf = config.datasets[key]
     const mbtiles = await new Promise((resolve, reject) => {
       return new MBTiles(`${conf.filepath}?mode=ro`, (err, mbtiles) => {
         debug(`Loaded ${conf.filepath}`)
@@ -32,11 +34,11 @@ export async function createMBTilesProvider (app) {
     })
     debug(`Metadata for ${conf.filepath}`, metadata)
     datasets.push({
-      name: conf.dataset,
+      name: key,
       mbtiles,
       layers: metadata.vector_layers.filter(layer => conf.layers.includes(layer.id))
     })
-  }
+  })
 
   debug(`MBTiles provider: found ${datasets.length} datasets`)
 
@@ -45,7 +47,7 @@ export async function createMBTilesProvider (app) {
 
     capabilities () {
       return _.reduce(datasets,
-        (sources, dataset) => sources.concat(dataset.layers.map(layer => getMappedName(renames, `${dataset.name}:${layer.id}`))),
+        (sources, dataset) => sources.concat(dataset.layers.map(layer => `${dataset.name}:${layer.id}`)),
         [])
     },
 
@@ -53,7 +55,7 @@ export async function createMBTilesProvider (app) {
       const matchingDatasets = datasets.filter(dataset => {
         // Check if dataset has at least a matching layer
         for (const layer of dataset.layers) {
-          const name = getMappedName(renames, `${dataset.name}:${layer.id}`)
+          const name = `${dataset.name}:${layer.id}`
           if (minimatch(name, filter || '*')) return true
         }
         return false
@@ -86,7 +88,7 @@ export async function createMBTilesProvider (app) {
         // For debug purpose
         // fs.writeFileSync('test.mvt', data)
         // Take filter into account
-        const layers = dataset.layers.filter(layer => minimatch(getMappedName(renames, `${dataset.name}:${layer.id}`), filter)).map(layer => layer.id)
+        const layers = dataset.layers.filter(layer => minimatch(`${dataset.name}:${layer.id}`, filter)).map(layer => layer.id)
         // Defaults to "point in polygon" query, otherwise specify a distance to search for nearby locations
         const radius = _.isNil(distance) ? 0 : distance
         limit = _.isNil(limit) ? 10 : limit

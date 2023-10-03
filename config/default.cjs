@@ -11,23 +11,21 @@ module.exports = {
   port,
   baseUrl,
   apiPath,
-  NodeGeocoder: [
-    { provider: 'opendatafrance' },
-    { provider: 'openstreetmap', headers: { 'user-agent': 'geokoder/0.1.0', referrer: '/forward' } }
-  ],
-  MBTiles: [
-    // For performance reason each layer in a dataset should have the same max zoom level, if not two different providers should be created for now
-    // Create a local.cjs file with your own data to test it as we don't provide any default datasets
-    //{ dataset: 'admin-express', filepath: path.join(__dirname, '../data/mbtiles/admin-express.mbtiles'), layers: ['commune', 'departement'] }
-  ],
-  renames: [
-    { from: 'opendatafrance', to: 'ban' },
-    { from: 'openstreetmap', to: 'nominatim' },
-    { from: 'kano:hubeau-(.*)', to: 'hubeau:$1', regex: true },
-    { from: 'kano:([^-]*)-sensors', to: '$1', regex: true },
-    { from: 'kano:([^-]*)-stations', to: '$1', regex: true },
-    { from: 'kano:([^-]*)-units', to: '$1', regex: true }
-  ],
+  providers: {
+    // Kano: {},
+    // NodeGeocoder: {
+    //   // Each key is a geocoder to instanciate in node-geocoder
+    //   // if value is false-ish, it won't be instanciated
+    //   opendatafrance: true,
+    //   openstreetmap: true
+    // },
+    // MBTiles: {
+    //   // For performance reason each layer in a dataset should have the same max zoom level, if not two different providers should be created for now
+    //   // Create a local.cjs file with your own data to test it as we don't provide any default datasets
+    //   // Each key will be a new source using the provided file
+    //   'admin-express': { filepath: path.join(__dirname, '../data/mbtiles/admin-express.mbtiles'), layers: ['commune', 'departement'] }
+    // }
+  },
   logs: {
     Console: {
       format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
