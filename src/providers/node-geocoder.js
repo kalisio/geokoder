@@ -9,8 +9,7 @@ const debug = makeDebug('geokoder:providers:node-geocoder')
 export async function createNodeGeocoderProvider (app) {
   const providers = app.get('providers')
   const config = _.get(providers, 'NodeGeocoder')
-  if (!config)
-    return null
+  if (!config) { return null }
 
   const geocoders = []
   _.keys(config).forEach((key) => {
@@ -20,7 +19,7 @@ export async function createNodeGeocoderProvider (app) {
         // openstreetmap geocoder require either a valid HTTP-referer or User-Agent
         // see https://operations.osmfoundation.org/policies/nominatim/
         sup.fetch = (url, options) => {
-          return fetch(url, { ...options, headers: { 'user-agent': `geokoder/0.1.0`} })
+          return fetch(url, { ...options, headers: { 'user-agent': 'geokoder/0.1.0' } })
         }
       }
 
@@ -115,7 +114,6 @@ export async function createNodeGeocoderProvider (app) {
           return
         }
 
-        
         debug(`retrieved ${result.value.length} entries from source ${source.name}`)
         for (const entry of result.value) {
           // 'normalize' response

@@ -13,8 +13,7 @@ const debug = makeDebug('geokoder:providers:mbtiles')
 export async function createMBTilesProvider (app) {
   const providers = app.get('providers')
   const config = _.get(providers, 'MBTiles')
-  if (!config)
-    return null
+  if (!config) { return null }
 
   const datasets = []
   _.keys(config).forEach(async (key) => {

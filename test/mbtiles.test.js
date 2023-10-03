@@ -12,9 +12,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 describe('geokoder:mbtiles', () => {
   let server, app
   const locations = [
-    { lat: 43.31091, lon: 1.94750, distance: 0, sources: 'mairies', results: [] },
-    { lat: 43.31091, lon: 1.94750, distance: 1000, sources: 'mairies', results: ['Castelnaudary'] },
-    { lat: 43.31091, lon: 1.94750, distance: 0, sources: 'epci', results: ['CC Castelnaudary Lauragais Audois'] }
+    { lat: 43.31091, lon: 1.94750, distance: 0, sources: 'mairies:mairies', results: [] },
+    { lat: 43.31091, lon: 1.94750, distance: 1000, sources: 'mairies:mairies', results: ['Castelnaudary'] },
+    { lat: 43.31091, lon: 1.94750, distance: 0, sources: 'epci:epci50m', results: ['CC Castelnaudary Lauragais Audois'] }
   ]
 
   before(() => {
@@ -37,12 +37,12 @@ describe('geokoder:mbtiles', () => {
   it('mbtiles sources appear in capabilities', async () => {
     let response = await superagent
       .get(`${app.get('baseUrl')}/capabilities/forward`)
-    expect(response.body.includes('mairies')).beFalse()
-    expect(response.body.includes('epci')).beFalse()
+    expect(response.body.includes('mairies:mairies')).beFalse()
+    expect(response.body.includes('epci:epci50m')).beFalse()
     response = await superagent
       .get(`${app.get('baseUrl')}/capabilities/reverse`)
-    expect(response.body.includes('mairies')).beTrue()
-    expect(response.body.includes('epci')).beTrue()
+    expect(response.body.includes('mairies:mairies')).beTrue()
+    expect(response.body.includes('epci:epci50m')).beTrue()
   })
   // Let enough time to process
     .timeout(10000)

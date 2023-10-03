@@ -7,8 +7,7 @@ const debug = makeDebug('geokoder:providers:kano')
 export async function createKanoProvider (app) {
   const providers = app.get('providers')
   const config = _.get(providers, 'Kano')
-  if (!config)
-    return null
+  if (!config) { return null }
 
   const apiPath = app.get('apiPath')
   // Available sources from Kano catalog
