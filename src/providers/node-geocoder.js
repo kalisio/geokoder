@@ -1,3 +1,6 @@
+import { fileURLToPath } from 'url'
+import fs from 'fs-extra'
+import path from 'path'
 import _ from 'lodash'
 import makeDebug from 'debug'
 import { minimatch } from 'minimatch'
@@ -11,6 +14,10 @@ export async function createNodeGeocoderProvider (app) {
   const config = _.get(providers, 'NodeGeocoder')
   if (!config) { return null }
 
+  const __filename = fileURLToPath(import.meta.url)
+  const __dirname = path.dirname(__filename)
+  const packageInfo = fs.readJsonSync(path.join(__dirname, '..', '..', 'package.json'))
+
   const geocoders = []
   _.keys(config).forEach((key) => {
     if (config[key]) {
@@ -19,7 +26,7 @@ export async function createNodeGeocoderProvider (app) {
         // openstreetmap geocoder require either a valid HTTP-referer or User-Agent
         // see https://operations.osmfoundation.org/policies/nominatim/
         sup.fetch = (url, options) => {
-          return fetch(url, { ...options, headers: { 'user-agent': 'geokoder/0.1.0' } })
+          return fetch(url, { ...options, headers: { 'user-agent': `geokoder/${packageInfo.version}` } })
         }
       }
 
