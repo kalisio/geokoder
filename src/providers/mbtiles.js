@@ -18,7 +18,7 @@ export async function createMBTilesProvider (app) {
 
   const datasets = []
   _.keys(config).forEach(async (key) => {
-    const conf = config.datasets[key]
+    const conf = config[key]
     const mbtiles = await new Promise((resolve, reject) => {
       return new MBTiles(`${conf.filepath}?mode=ro`, (err, mbtiles) => {
         debug(`Loaded ${conf.filepath}`)
