@@ -1,10 +1,17 @@
+const _ = require('lodash')
 const path = require('path')
+const glob = require('glob')
 const winston = require('winston')
 
 const host = process.env.HOSTNAME || 'localhost'
 const port = process.env.PORT || 8080
 const apiPath = process.env.API_PREFIX || '/api'
 const baseUrl = process.env.BASE_URL || `http://${host}:${port}`
+
+let i18n = {}
+glob.sync(path.join(__dirname, 'i18n/**/*.cjs')).forEach(i18nFile => {
+  _.merge(i18n, require(i18nFile))
+})
 
 module.exports = {
   host,
@@ -26,6 +33,7 @@ module.exports = {
     //   'admin-express': { filepath: path.join(__dirname, '../data/mbtiles/admin-express.mbtiles'), layers: ['commune', 'departement'] }
     // }
   },
+  i18n,
   logs: {
     Console: {
       format: winston.format.combine(winston.format.colorize(), winston.format.simple()),

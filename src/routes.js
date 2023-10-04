@@ -38,7 +38,10 @@ export default function (app) {
     
     const all = Providers.get().filter(provider => typeof provider[operation] === 'function').map(provider => provider.capabilities())
 
-    const response = []
+    const response = {
+      geocoders: [],
+      i18n: app.get('i18n')
+    }
     const results = await Promise.allSettled(all)
     results.forEach((result) => {
       if (result.status !== 'fulfilled') {
@@ -46,7 +49,7 @@ export default function (app) {
         return
       }
 
-      response.splice(-1, 0, ...result.value)
+      response.geocoders.splice(-1, 0, ...result.value)
     })
 
     res.json(response)
