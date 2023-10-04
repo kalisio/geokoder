@@ -40,7 +40,7 @@ export default function (app) {
 
     const response = {
       geocoders: [],
-      i18n: app.get('i18n')
+      i18n: app.get('i18n')['i18n']
     }
     const results = await Promise.allSettled(all)
     results.forEach((result) => {
