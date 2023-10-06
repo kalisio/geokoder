@@ -10,12 +10,10 @@ export async function createKanoProvider (app) {
   if (!config) { return null }
 
   const apiPath = app.get('apiPath')
-  // Available sources from Kano catalog
-  let sources = []
-
+  
   // Use the catalog service to build a list of sources (ie. feature services we can use)
-  async function refreshSources () {
-    sources = []
+  async function getSources () {
+    const sources = []
     try {
       const catalog = app.service(`${apiPath}/catalog`)
       if (catalog) {
@@ -43,22 +41,20 @@ export async function createKanoProvider (app) {
     } catch (error) {
       debug(error)
     }
+    return sources
   }
-
-  app.on('service', async service => {
-    // When catalog is available request sources
-    if (service.path.includes('catalog')) await refreshSources()
-  })
 
   return {
     name: 'Kano',
 
-    capabilities () {
+    async capabilities () {
+      const sources = await getSources()
       const caps = sources.map((source) => source.name)
       return caps
     },
 
     async forward (search, filter) {
+      const sources = await getSources()
       const matchingSources = sources.filter((source) => minimatch(source.name, filter))
 
       // issue requests to discovered services
@@ -108,6 +104,7 @@ export async function createKanoProvider (app) {
     },
 
     async reverse ({ lat, lon, filter, distance, limit }) {
+      const sources = await getSources()
       const matchingSources = sources.filter((source) => minimatch(source.name, filter))
 
       const requests = []

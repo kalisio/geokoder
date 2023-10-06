@@ -49,7 +49,7 @@ The query returns the list of matching features, as an array. The service also a
 
 By default, **geokoder** does not expose any sources. You are responsible to write a `local.cjs` file to declare the different sources you want to expose.
 
-Here is an example file that exposes all the source from the **Kano** provider, `opendatafrance` from the **NodeGeocoder** provider and `api-geo` from the **MBTiles** provider:
+Here is an example file that exposes all the sources from the **Kano** provider, `opendatafrance` from the **NodeGeocoder** provider and `api-geo` dataset sources from the **MBTiles** provider:
 
 ```js
 module.exports = {
@@ -82,13 +82,13 @@ NodeGeocoder: {
 
 #### MBtiles
 
-Each key will be a new source using the provided file such as: 
+Each key will be a new dataset based on the provided file and exposing some layers as sources such as: 
 
 `admin-express': { filepath: path.join(__dirname, '../data/mbtiles/admin-express.mbtiles'), layers: ['commune', 'departement']`. 
 
 > NOTE
 > 
-> For performance reason each layer in a dataset should have the same max zoom level, if not two different sources should be created for now.
+> For performance reason each layer in a dataset should have the same max zoom level, if not two different datasets should be created for now.
 
 ### i18n
 

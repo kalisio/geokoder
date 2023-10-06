@@ -108,7 +108,7 @@ export async function createMBTilesProvider (app) {
           return Object.assign({ source }, { feature: _.omit(feature, ['properties.tilequery']) })
         })
         responses = responses.concat(features)
-        debug(`retrieved ${features.length} features from dataset ${dataset.name}`)
+        debug(`Retrieved ${features.length} features from dataset ${dataset.name}`)
       }
       return responses
     }
