@@ -10,7 +10,7 @@ export async function createKanoProvider (app) {
   if (!config) { return null }
 
   const apiPath = app.get('apiPath')
-  
+
   // Use the catalog service to build a list of sources (ie. feature services we can use)
   async function getSources () {
     const sources = []
@@ -59,12 +59,13 @@ export async function createKanoProvider (app) {
 
       // issue requests to discovered services
       const requests = []
-      debug(`requesting ${matchingSources.length} matching sources`, _.map(matchingSources, 'name'))
+      debug(`Requesting ${matchingSources.length} matching sources`, _.map(matchingSources, 'name'))
       for (const source of matchingSources) {
         try {
           const service = app.service(`${apiPath}/${source.collection}`)
           const searches = source.keys.map((key) => { return { [key]: { $search: search } } })
           const query = source.keys.length === 1 ? searches[0] : { $or: searches }
+          debug(`Requesting source ${source.name} with query`, query)
           const request = service.find({ query })
           request.source = source
           requests.push(request)
@@ -81,12 +82,12 @@ export async function createKanoProvider (app) {
         const source = requests[i].source
         if (result.status !== 'fulfilled') {
           // skip failed results
-          debug(`request to ${source.collection} failed: ${result.reason}`)
+          debug(`Request to ${source.collection} failed:`, result.reason)
           continue
         }
 
         const features = result.value.features
-        debug(`request to ${source.collection}: ${features.length} results`)
+        debug(`Request to ${source.collection}: ${features.length} results`)
         for (const feature of features) {
           const name = _.get(feature, source.keys[0])
           response.push({
@@ -108,12 +109,13 @@ export async function createKanoProvider (app) {
       const matchingSources = sources.filter((source) => minimatch(source.name, filter))
 
       const requests = []
-      debug(`requesting ${matchingSources.length} matching sources`, _.map(matchingSources, 'name'))
+      debug(`Requesting ${matchingSources.length} matching sources`, _.map(matchingSources, 'name'))
       for (const source of matchingSources) {
         try {
           const service = app.service(`${apiPath}/${source.collection}`)
           const query = { latitude: lat, longitude: lon, distance }
           if (!_.isNil(limit)) query.$limit = limit
+          debug(`Requesting source ${source.name} with query`, query)
           const request = service.find({ query })
           request.source = source
           requests.push(request)
@@ -129,12 +131,12 @@ export async function createKanoProvider (app) {
         const source = requests[i].source
         if (result.status !== 'fulfilled') {
           // skip failed results
-          debug(`request to ${source.collection} failed: ${result.reason}`)
+          debug(`Request to ${source.collection} failed:`, result.reason)
           continue
         }
 
         const features = result.value.features
-        debug(`retrieved ${features.length} features from source ${source.name}`)
+        debug(`Retrieved ${features.length} features from source ${source.name}`)
         for (const feature of features) {
           response.push({
             source: source.name,

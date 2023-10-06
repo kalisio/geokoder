@@ -1,0 +1,61 @@
+{
+  "type": "FeatureCollection",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+        "type": "Feature",
+        "geometry":
+        {
+            "type": "Point",
+            "coordinates":
+            [
+                -0.659155011177063,
+                45.123741149902344,
+                0
+            ]
+        },
+        "properties":
+        {
+            "irsnId": 1089,
+            "name": "BLAYE"
+        },
+        "geokoder":
+        {
+            "source": "kano:teleray-sensors",
+            "match": "BLAYE",
+            "matchProp": "properties.name",
+            "score": 1
+        }
+    },
+    {
+        "type": "Feature",
+        "geometry":
+        {
+            "type": "Point",
+            "coordinates":
+            [
+                0.2469950020313263,
+                47.16524887084961,
+                0
+            ]
+        },
+        "properties":
+        {
+            "irsnId": 1144,
+            "name": "CHINON"
+        },
+        "geokoder":
+        {
+            "source": "kano:teleray-sensors",
+            "match": "CHINON",
+            "matchProp": "properties.name",
+            "score": 1
+        }
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+[ 
+  {
+    "name": "Layers.TELERAY",
+    "description": "Layers.TELERAY_DESCRIPTION",
+    "i18n": {
+      "fr": {
+        "Layers": {
+          "TELERAY": "Téléray",
+          "TELERAY_DESCRIPTION": "Données Téléray"
+        }
+      },
+      "en": {
+        "Layers": {
+          "TELERAY": "Téléray",
+          "TELERAY_DESCRIPTION": "Téléray data"
+        }
+      }
+    },
+    "type" : "OverlayLayer",
+    "service": "teleray-observations",
+    "probeService": "teleray-stations",
+    "featureId": "irsnId",
+    "featureLabel": "name",
+    "from": "P-7D",
+    "to": "PT-10M",
+    "bbox": [2.05338918702, -54.5247541978, 9.56001631027, 51.1485061713]
+  },
+  {
+    "name": "Layers.RTE",
+    "description": "Layers.RTE_DESCRIPTION",
+    "i18n": {
+      "fr": {
+        "Layers": {
+          "RTE": "RTE",
+          "RTE_DESCRIPTION": "Données RTE"
+        }
+      },
+      "en": {
+        "Layers": {
+          "RTE": "RTE",
+          "RTE_DESCRIPTION": "RTE data"
+        }
+      }
+    },
+    "type" : "OverlayLayer",
+    "service": "rte-generation",
+    "probeService": "rte-units",
+    "featureId": "eicCode",
+    "featureLabel": "name",
+    "from": "P-7D",
+    "to": "PT-10M",
+    "bbox": [2.05338918702, -54.5247541978, 9.56001631027, 51.1485061713]
+  }
+]
+

@@ -49,7 +49,7 @@ export async function createNodeGeocoderProvider (app) {
 
       const requests = []
       // issue requests to geocoders
-      debug(`requesting ${matchingSources.length} matching sources`, _.map(matchingSources, 'name'))
+      debug(`Requesting ${matchingSources.length} matching sources`, _.map(matchingSources, 'name'))
       for (const geocoder of matchingSources) {
         const request = geocoder.impl.geocode(search)
         request.source = geocoder
@@ -64,7 +64,7 @@ export async function createNodeGeocoderProvider (app) {
         const source = requests[i].source
         if (result.status !== 'fulfilled') {
           // skip failed results
-          debug(`request to ${source.name} failed: ${result.reason}`)
+          debug(`Request to ${source.name} failed:`, result.reason)
           continue
         }
 
@@ -105,7 +105,7 @@ export async function createNodeGeocoderProvider (app) {
 
       const requests = []
       // issue requests to geocoders
-      debug(`requesting ${matchingSources.length} matching sources`, _.map(matchingSources, 'name'))
+      debug(`Requesting ${matchingSources.length} matching sources`, _.map(matchingSources, 'name'))
       for (const geocoder of matchingSources) {
         const request = geocoder.impl.reverse({ lat, lon })
         request.source = geocoder
@@ -118,7 +118,9 @@ export async function createNodeGeocoderProvider (app) {
         const result = results[i]
         const source = requests[i].source
         if (result.status !== 'fulfilled') {
-          return
+          // skip failed results
+          debug(`Request to ${source.name} failed:`, result.reason)
+          continue
         }
 
         debug(`retrieved ${result.value.length} entries from source ${source.name}`)

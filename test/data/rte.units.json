@@ -1,0 +1,98 @@
+{
+    "type": "FeatureCollection",
+    "crs":
+    {
+        "type": "name",
+        "properties":
+        {
+            "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+        }
+    },
+    "features":
+    [
+        {
+            "type": "Feature",
+            "geometry":
+            {
+                "type": "Point",
+                "coordinates":
+                [
+                    0.1703,
+                    47.2273,
+                    0
+                ]
+            },
+            "properties":
+            {
+                "name": "Chinon-B1",
+                "eicCode": "17W100P100P0106T",
+                "plantId": "CHINON",
+                "reactorIndex": "1",
+                "stage": "CP2",
+                "thermalPower_MW": 2785,
+                "rawPower_MW": 954,
+                "netPower_MW": 905,
+                "buildStartDate": "1977-03-01T00:00:00.000Z",
+                "firstReactionDate": "1982-10-28T00:00:00.000Z",
+                "gridLinkDate": "1982-11-30T00:00:00.000Z",
+                "exploitationStartDate": "1984-02-01T00:00:00.000Z",
+                "moxAuthorizationDate": "1998-07-21T00:00:00.000Z",
+                "coolingTowerCount": "1",
+                "coolingType": "RIVER",
+                "coolingPlace": "Loire",
+                "wikiLink": "https://fr.wikipedia.org/wiki/Centrale_nucl%C3%A9aire_de_Chinon",
+                "asnLink": "https://www.asn.fr/L-ASN/L-ASN-en-region/Centre-Val-de-Loire/Installations-nucleaires/Centrale-nucleaire-de-Chinon-B",
+                "edfLink": "https://www.edf.fr/centrale-nucleaire-chinon"
+            },
+            "geokoder":
+            {
+                "source": "kano:rte-units",
+                "match": "Chinon-B1",
+                "matchProp": "properties.name",
+                "score": 0.9444444444444444
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry":
+            {
+                "type": "Point",
+                "coordinates":
+                [
+                    0.1703,
+                    47.2273,
+                    0
+                ]
+            },
+            "properties":
+            {
+                "name": "Chinon-B2",
+                "eicCode": "17W100P100P0107R",
+                "plantId": "CHINON",
+                "reactorIndex": "2",
+                "stage": "CP2",
+                "thermalPower_MW": 2785,
+                "rawPower_MW": 954,
+                "netPower_MW": 905,
+                "buildStartDate": "1977-03-01T00:00:00.000Z",
+                "firstReactionDate": "1983-09-23T00:00:00.000Z",
+                "gridLinkDate": "1983-11-29T00:00:00.000Z",
+                "exploitationStartDate": "1984-08-01T00:00:00.000Z",
+                "moxAuthorizationDate": "1998-07-21T00:00:00.000Z",
+                "coolingTowerCount": "1",
+                "coolingType": "RIVER",
+                "coolingPlace": "Loire",
+                "wikiLink": "https://fr.wikipedia.org/wiki/Centrale_nucl%C3%A9aire_de_Chinon",
+                "asnLink": "https://www.asn.fr/L-ASN/L-ASN-en-region/Centre-Val-de-Loire/Installations-nucleaires/Centrale-nucleaire-de-Chinon-B",
+                "edfLink": "https://www.edf.fr/centrale-nucleaire-chinon"
+            },
+            "geokoder":
+            {
+                "source": "kano:rte-units",
+                "match": "Chinon-B2",
+                "matchProp": "properties.name",
+                "score": 0.9444444444444444
+            }
+        }
+    ]
+}

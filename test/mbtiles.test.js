@@ -37,12 +37,14 @@ describe('geokoder:mbtiles', () => {
   it('mbtiles sources appear in capabilities', async () => {
     let response = await superagent
       .get(`${app.get('baseUrl')}/capabilities/forward`)
-    expect(response.body.includes('mairies:mairies')).beFalse()
-    expect(response.body.includes('epci:epci50m')).beFalse()
+    expect(response.body.geocoders).toExist()
+    expect(response.body.geocoders.includes('mairies:mairies')).beFalse()
+    expect(response.body.geocoders.includes('epci:epci50m')).beFalse()
     response = await superagent
       .get(`${app.get('baseUrl')}/capabilities/reverse`)
-    expect(response.body.includes('mairies:mairies')).beTrue()
-    expect(response.body.includes('epci:epci50m')).beTrue()
+    expect(response.body.geocoders).toExist()
+    expect(response.body.geocoders.includes('mairies:mairies')).beTrue()
+    expect(response.body.geocoders.includes('epci:epci50m')).beTrue()
   })
   // Let enough time to process
     .timeout(10000)

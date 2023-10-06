@@ -61,7 +61,7 @@ export async function createMBTilesProvider (app) {
       })
 
       let responses = []
-      debug(`requesting ${matchingDatasets.length} matching datasets`, _.map(matchingDatasets, 'name'))
+      debug(`Requesting ${matchingDatasets.length} matching datasets`, _.map(matchingDatasets, 'name'))
       for (const dataset of matchingDatasets) {
         // Find tile for position
         // FIXME: we assume the same zoom level for all layers
