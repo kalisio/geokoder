@@ -21,7 +21,8 @@ export async function createNodeGeocoderProvider (app) {
   const geocoders = []
   _.keys(config).forEach((key) => {
     if (config[key]) {
-      const sup = {}
+      // If not simply is enalbed/disabled flag then we might have additional options for geocoder
+      const sup = (typeof config[key] === 'object' ? config[key] : {})
       if (key === 'openstreetmap') {
         // openstreetmap geocoder require either a valid HTTP-referer or User-Agent
         // see https://operations.osmfoundation.org/policies/nominatim/

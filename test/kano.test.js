@@ -8,7 +8,7 @@ import chai, { util, expect } from 'chai'
 import chailint from 'chai-lint'
 import distribution, { finalize } from '@kalisio/feathers-distributed'
 import { kdk } from '@kalisio/kdk/core.api.js'
-import { createFeaturesService, createCatalogService } from '@kalisio/kdk/map.api.js'
+import { createFeaturesService, createCatalogService, removeCatalogService } from '@kalisio/kdk/map.api.js'
 import { createServer } from '../src/main.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -107,7 +107,7 @@ describe('geokoder:kano', () => {
   // Let enough time to process
     .timeout(15000)
 
-  it('kano sources appear in capabilities', async () => {
+  it('kano sources from catalog appear in capabilities', async () => {
     let response = await superagent
       .get(`${app.get('baseUrl')}/capabilities/forward`)
     expect(response.body.geocoders).toExist()
@@ -122,12 +122,11 @@ describe('geokoder:kano', () => {
   // Let enough time to process
     .timeout(10000)
 
-  it('forward geocoding on kano sources', async () => {
+  it('forward geocoding on kano sources from catalog', async () => {
     for (let i = 0; i < searches.length; i++) {
       const search = searches[i]
       const response = await superagent
         .get(`${app.get('baseUrl')}/forward?q=${search.pattern}&sources=${search.sources}`)
-      console.log(response.body)
       expect(response.body.length).to.equal(search.results.length)
       response.body.forEach((feature, index) => {
         expect(_.get(feature, 'properties.name', '')).to.equal(search.results[index])
@@ -137,11 +136,60 @@ describe('geokoder:kano', () => {
   // Let enough time to process
     .timeout(10000)
 
-  it('reverse geocoding on kano sources', async () => {
+  it('reverse geocoding on kano sources from catalog', async () => {
     for (let i = 0; i < locations.length; i++) {
       const location = locations[i]
       const response = await superagent
         .get(`${app.get('baseUrl')}/reverse?lat=${location.lat}&lon=${location.lon}&distance=${location.distance}&sources=${location.sources}`)
+      expect(response.body.length).to.equal(location.results.length)
+      response.body.forEach((feature, index) => {
+        expect(_.get(feature, 'properties.name', '')).to.equal(location.results[index])
+      })
+    }
+  })
+  // Let enough time to process
+    .timeout(10000)
+
+  it('kano sources from services appear in capabilities', async () => {
+    // Remove the global catalog service
+    await catalogService.Model.drop()
+    await removeCatalogService.call(kapp)
+    catalogService = kapp.getService('catalog')
+    expect(catalogService).beNull()
+
+    let response = await superagent
+      .get(`${app.get('baseUrl')}/capabilities/forward`)
+    expect(response.body.geocoders).toExist()
+    expect(response.body.geocoders.includes('services:teleray-stations')).beTrue()
+    expect(response.body.geocoders.includes('services:rte-units')).beTrue()
+    response = await superagent
+      .get(`${app.get('baseUrl')}/capabilities/reverse`)
+    expect(response.body.geocoders).toExist()
+    expect(response.body.geocoders.includes('services:teleray-stations')).beTrue()
+    expect(response.body.geocoders.includes('services:rte-units')).beTrue()
+  })
+  // Let enough time to process
+    .timeout(10000)
+
+  it('forward geocoding on kano sources from services', async () => {
+    for (let i = 0; i < searches.length; i++) {
+      const search = searches[i]
+      const response = await superagent
+        .get(`${app.get('baseUrl')}/forward?q=${search.pattern}&sources=${search.sources.replace('kano', 'services')}`)
+      expect(response.body.length).to.equal(search.results.length)
+      response.body.forEach((feature, index) => {
+        expect(_.get(feature, 'properties.name', '')).to.equal(search.results[index])
+      })
+    }
+  })
+  // Let enough time to process
+    .timeout(10000)
+
+  it('reverse geocoding on kano sources from services', async () => {
+    for (let i = 0; i < locations.length; i++) {
+      const location = locations[i]
+      const response = await superagent
+        .get(`${app.get('baseUrl')}/reverse?lat=${location.lat}&lon=${location.lon}&distance=${location.distance}&sources=${location.sources.replace('kano', 'services')}`)
       expect(response.body.length).to.equal(location.results.length)
       response.body.forEach((feature, index) => {
         expect(_.get(feature, 'properties.name', '')).to.equal(location.results[index])
@@ -156,7 +204,6 @@ describe('geokoder:kano', () => {
     if (server) await server.close()
     finalize(kapp)
     fs.emptyDirSync(path.join(__dirname, 'logs'))
-    await catalogService.Model.drop()
     await telerayStationsService.Model.drop()
     await rteUnitsService.Model.drop()
     await kapp.db.disconnect()

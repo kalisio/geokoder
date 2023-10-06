@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import makeDebug from 'debug'
 import { minimatch } from 'minimatch'
+import { stripSlashes } from '@feathersjs/commons'
 
 const debug = makeDebug('geokoder:providers:kano')
 
@@ -8,6 +9,7 @@ export async function createKanoProvider (app) {
   const providers = app.get('providers')
   const config = _.get(providers, 'Kano')
   if (!config) { return null }
+  const services = config.services || {}
 
   const apiPath = app.get('apiPath')
 
@@ -15,20 +17,20 @@ export async function createKanoProvider (app) {
   async function getSources () {
     const sources = []
     try {
-      const catalog = app.service(`${apiPath}/catalog`)
-      if (catalog) {
+      // Try to use any catalog service available
+      if (app.services[stripSlashes(`${apiPath}/catalog`)]) {
+        debug('Seeking for sources in catalog')
+        const catalogService = app.service(`${apiPath}/catalog`)
         // we need layers with 'service' or 'probeService' and 'featureLabel' properties
-        const layers = await catalog.find(
-          {
-            paginate: false,
-            query:
-            {
-              $and: [
-                { $or: [{ service: { $exists: true } }, { probeService: { $exists: true } }] },
-                { featureLabel: { $exists: true } }
-              ]
-            }
-          })
+        const layers = await catalogService.find({
+          paginate: false,
+          query: {
+            $and: [
+              { $or: [{ service: { $exists: true } }, { probeService: { $exists: true } }] },
+              { featureLabel: { $exists: true } }
+            ]
+          }
+        })
         layers.forEach((layer) => {
           // use probeService in priority when available
           const collection = _.get(layer, 'probeService', layer.service)
@@ -37,7 +39,22 @@ export async function createKanoProvider (app) {
           sources.push({ name: `kano:${collection}`, collection, keys: featureLabels })
         })
       }
-      debug(`Kano provider: found ${sources.length} sources`)
+      // Otherwise try to retrieve available services as if they are
+      // authorised in the distribution config it should be exposed
+      debug('Seeking for sources in app services')
+      const servicePaths = Object.keys(app.services)
+      servicePaths.forEach(path => {
+        const service = app.service(path)
+        // Do not expose catalog or local internal services
+        if (!service.remote || (path === stripSlashes(`${apiPath}/catalog`))) return
+        const serviceName = stripSlashes(path).replace(stripSlashes(apiPath) + '/', '')
+        // Check if defined in config or already exposed as a layer
+        if (!services[serviceName] || _.find(sources, { name: `kano:${serviceName}` })) return
+        // Retrieve keys from service config
+        // FIXME might be automated with https://github.com/kalisio/feathers-distributed/issues/125
+        sources.push({ name: `services:${serviceName}`, collection: serviceName, keys: services[serviceName] })
+      })
+      debug(`Kano provider: found ${sources.length} sources`, _.map(sources, 'name'))
     } catch (error) {
       debug(error)
     }
