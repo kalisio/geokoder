@@ -28,6 +28,8 @@ jobs:
     language: node_js
     node_js:
     - '16'
+    services:
+    - mongodb
     env:
     - CC_TEST_REPORTER_ID=db028d86210785c300155b473cba95a59dc3b0c0ababed2737389957372c2092
     install:
