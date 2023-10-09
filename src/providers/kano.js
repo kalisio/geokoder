@@ -70,7 +70,7 @@ export async function createKanoProvider (app) {
       return caps
     },
 
-    async forward (search, filter) {
+    async forward ({ search, filter, limit }) {
       const sources = await getSources()
       const matchingSources = sources.filter((source) => minimatch(source.name, filter))
 
@@ -82,6 +82,7 @@ export async function createKanoProvider (app) {
           const service = app.service(`${apiPath}/${source.collection}`)
           const searches = source.keys.map((key) => { return { [key]: { $search: search } } })
           const query = source.keys.length === 1 ? searches[0] : { $or: searches }
+          if (!_.isNil(limit)) query.$limit = limit
           debug(`Requesting source ${source.name} with query`, query)
           const request = service.find({ query })
           request.source = source

@@ -45,14 +45,16 @@ export async function createNodeGeocoderProvider (app) {
       return caps
     },
 
-    async forward (search, filter) {
+    async forward ({ search, filter, limit }) {
       const matchingSources = geocoders.filter(geocoder => minimatch(geocoder.name, filter))
 
       const requests = []
       // issue requests to geocoders
       debug(`Requesting ${matchingSources.length} matching sources`, _.map(matchingSources, 'name'))
       for (const geocoder of matchingSources) {
-        const request = geocoder.impl.geocode(search)
+        const request = (!_.isNil(limit)
+          ? (geocoder.name === 'openstreetmap' ? geocoder.impl.geocode({ q: search, limit }) : geocoder.impl.geocode({ address: search, limit }))
+          : geocoder.impl.geocode(search))
         request.source = geocoder
         requests.push(request)
       }
@@ -101,14 +103,16 @@ export async function createNodeGeocoderProvider (app) {
       return response
     },
 
-    async reverse ({ lat, lon, filter }) {
+    async reverse ({ lat, lon, filter, limit }) {
       const matchingSources = geocoders.filter(geocoder => minimatch(geocoder.name, filter))
 
       const requests = []
       // issue requests to geocoders
       debug(`Requesting ${matchingSources.length} matching sources`, _.map(matchingSources, 'name'))
       for (const geocoder of matchingSources) {
-        const request = geocoder.impl.reverse({ lat, lon })
+        const query = { lat, lon }
+        if (!_.isNil(limit)) query.limit = limit
+        const request = geocoder.impl.reverse(query)
         request.source = geocoder
         requests.push(request)
       }

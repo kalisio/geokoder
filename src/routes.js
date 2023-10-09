@@ -58,7 +58,10 @@ export default function (app) {
   app.get('/forward', async (req, res, next) => {
     const q = _.get(req.query, 'q')
     const filter = _.get(req.query, 'sources', '*')
-    const all = Providers.get().filter(provider => typeof provider.forward === 'function').map(provider => provider.forward(q, filter))
+    const options = { search: q, filter}
+    // Some providers might support additional parameters
+    if (_.has(req.query, 'limit')) options.limit = _.toInteger(_.get(req.query, 'limit'))
+    const all = Providers.get().filter(provider => typeof provider.forward === 'function').map(provider => provider.forward(options))
 
     const response = []
     const results = await Promise.allSettled(all)
