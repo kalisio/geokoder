@@ -7,10 +7,13 @@
 [![Dependency Status](https://img.shields.io/david/kalisio/geokoder.svg?style=flat-square)](https://david-dm.org/kalisio/geokoder)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Kano geocoder service**
+**Kalisio geocoder service**
 
-**geokoder** is a service that let you perform forward and reverse geocoding in various sources.
-
+**geokoder** is a service that let you perform forward and reverse geocoding in various sources exposed by a provider. The following providers are currently supported:
+  * `Kano` to expose [Kano](https://kalisio.github.io/kano/) catalog layers as sources,
+  * `NodeGeocoder` to expose [node-geocoder](https://nchaulet.github.io/node-geocoder/) providers as sources,
+  * `MBTiles` to expose layers from [MBTiles](https://wiki.openstreetmap.org/wiki/MBTiles) as sources.
+  
 ## API
 
 ### /healthcheck (GET)
@@ -67,11 +70,11 @@ module.exports = {
 
 #### Kano
 
-For now, each layer in the catalog exposing the `featureLabel` property will be taken into account.
+For now, each layer in the catalog exposing the `featureLabel` property will be taken into account. This property can be a single string value or an array of strings to target multiple fields.
 
 #### NodeGeocoder
 
-Each key is a geocoder to instanciate in [node-geocoder](https://github.com/nchaulet/node-geocoder). if value is false-ish, it won't be instanciated.
+Each key is a geocoder to instanciate in [node-geocoder](https://github.com/nchaulet/node-geocoder). If value is false-ish, it won't be instanciated. If you'd like to pass additional options to the geocoder instance then it could be an object containing the options.
 
 ```js
 NodeGeocoder: {
