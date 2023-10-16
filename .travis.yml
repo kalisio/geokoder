@@ -1,21 +1,16 @@
-# Using latest ubuntu as of now because using the default one (xenial)
-# the build fails in docker while running yarn install in the builder ...
 dist: jammy
-
 notifications:
   email: false
   slack:
     on_success: always
     on_failure: always
     rooms:
-      secure: fRJLPN1XwquqO23+1NvlmdKzYbYSgr+6gbsU38r47JSre9i2EyWuza1N4g2IIiS7kkgY+Et2MRxgs4QglPhgasvbwtJJ/yVkpWnkxtWoJ9Uk/exFMGfvVt6GO9as5Hbw0h8uykyB58TjTNheDhfpP42mKAR3jusndYIsT+yVAcnNkD84qHVawoOZW4UA9tdzGFAh5y0Zv17cUIGhZ3OXgVr3rqKctXI3TxM2UYQfIhTn6FYCYuQpr9Xlq04ExXoMnzTrq0CL131eH5R0CWar9AL09M5To3iweh7mA1i3bfg0088CUxEcdodYM9m4By0Wa1QRUXUCtOGcqSS1ouhqfFjJpRFQiaGSigvDHv/52X2Ltx2RiYPS74gcR07t6o6F0KTwiWLNzgKAX12OXCPkYV+/tFB7Wli8ScodP9oCFCVNx/qjdaBCr9jlfnJ5X6q5eKE5qNXMN7ha4GwYkLm7aKLm5EEC9l4M0w4kAs9kCjE2wDUy1J5pbp9IE5g8oc+betpExJyw+LIQBsnzVwJQyGE4BGp06FtI4YHLOT9PlUMeT+89+CTKGFlXzy5WFLXD1yu8MgZV6OuiDe0tYDpef5e2VcKU8bVZlbHCRjXcSiqSnPo1RxzSHji62Ge+nqF728KTp/lBWgmbChByxhvAbKvQvU0aQ/XUbRIRr/ZSZJU=
-
+      secure: BAsInVJJa+yKD9oQ3G4Y27AHqpY4HQ6QTR37ypa5UfXik/EAZ2d4/g85UwdY2ID/cS/E97bOoMR/nnaij3nsx0BBy79a9/CPqMho+o7zjPvgkJS/QuwCUDKBIJuai7V4UURGvtxEoA3JbaVUBm/TfprZGbFEfT9avhJ9zQIMmLuzslPLK6QAdL6LS2YuhzO/k2PHXDc+UV98sHqvOKPd/oFbIrWdTuB9prYtZytrpiLhNKbqnDg+SeeMjcpzTbAFjo7LsfnAbKgFXRHGobY2ps/cqAyMlFVfBF6rP2odDRXsN9ab5nqFP2G+OClW7t+SPAFSXxZUmntNpohRpQeV5Ny5cKknf/uGfGBiQc1V4JoPSO3Ce4aN6F1ttKx2hTBpzMAlQyYrDhFTYKtNxMUpU7JbbAAaaVBN47xqO14g+pFF+3kbPpHSaHjt3WWJ519mwEHtthvaTi19tTxx9gZiOLashVDPuher8LAEc5L8aRnUnbpcAhA2tNiJF4mI2CZVz0i8R1pAOPpZwM92RYjNOPWzxTwW02kOze8vgBgZZBdCGPm3OP/XgPUlHo4n7UEd7LWT7bhIOkC/VtfA4gol98ujGrc2rHNsjfD2XvkTR5/eDulgMk7j4LkQra3hlw6z2RtKQrR7b40GBll2MoXiQPCyoa1nDNkxWVXnSXaM9Jc=
 stages:
 - name: BUILD
   if: commit_message !~ /(skip[ _-]build)/
 - name: TEST
   if: commit_message !~ /(skip[ _-]test)/
-
 jobs:
   include:
   - stage: BUILD
@@ -33,7 +28,8 @@ jobs:
     env:
     - CC_TEST_REPORTER_ID=db028d86210785c300155b473cba95a59dc3b0c0ababed2737389957372c2092
     install:
-    - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+    - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64
+      > ./cc-test-reporter
     - chmod +x ./cc-test-reporter
     - "./cc-test-reporter before-build"
     script:
