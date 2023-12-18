@@ -1,5 +1,5 @@
 {
-  "name": "geokoder",
+  "name": "@kalisio/geokoder",
   "description": "Kalisio geocoding service",
   "version": "0.1.0",
   "homepage": "https://github.com/kalisio/geokoder",
