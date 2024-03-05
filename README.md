@@ -124,16 +124,15 @@ module.exports = {
 }
 ```
 
-### Envinoment variables
+### Environment variables
 
-**geokoder** let you customize the way 
 Here are the environment variables you can use to customize the service:
 
 | Variable  | Description | Defaults |
 |-----------| ------------| ------------|
 | `PORT` | The port to be used when exposing the service |  `8080` |
 | `HOSTNAME` | The hostname to be used when exposing the service | `localhost` |
-| `BASEèURL` | The url used when exposing the service | `localhost:8080` |
+| `BASE_URL` | The url used when exposing the service | `localhost:8080` |
 | `API_PATH` | The path to the API |
 
 > Note
