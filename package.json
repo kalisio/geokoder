@@ -43,11 +43,11 @@
     ]
   },
   "dependencies": {
-    "@feathersjs/commons": "^5.0.5",
-    "@feathersjs/configuration": "^5.0.0",
-    "@feathersjs/express": "^5.0.0",
-    "@feathersjs/feathers": "^5.0.0",
-    "@kalisio/feathers-distributed": "^2.0.2",
+    "@feathersjs/commons": "^5.0.8",
+    "@feathersjs/configuration": "^5.0.8",
+    "@feathersjs/express": "^5.0.8",
+    "@feathersjs/feathers": "^5.0.8",
+    "@kalisio/feathers-distributed": "^2.4.0",
     "@mapbox/mbtiles": "^0.12.1",
     "@mapbox/vtquery": "^0.6.0",
     "containerized": "^1.0.2",
