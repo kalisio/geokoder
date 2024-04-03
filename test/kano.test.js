@@ -203,7 +203,6 @@ describe('geokoder:kano', () => {
   after(async () => {
     //if (server) await server.close()
     await app.teardown()
-    finalize(kapp)
     fs.emptyDirSync(path.join(__dirname, 'logs'))
     await telerayStationsService.Model.drop()
     await rteUnitsService.Model.drop()

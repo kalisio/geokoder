@@ -64,7 +64,7 @@
     "zlib": "^1.0.5"
   },
   "devDependencies": {
-    "@kalisio/kdk": "https://github.com/kalisio/kdk",
+    "@kalisio/kdk": "^2.2.0",
     "c8": "^7.11.0",
     "chai": "^4.3.6",
     "chai-lint": "^0.1.1",

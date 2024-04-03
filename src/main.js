@@ -7,7 +7,7 @@ import cors from 'cors'
 import feathers from '@feathersjs/feathers'
 import configuration from '@feathersjs/configuration'
 import express from '@feathersjs/express'
-import distribution from '@kalisio/feathers-distributed'
+import distribution, { finalize } from '@kalisio/feathers-distributed'
 import { Providers } from './providers.js'
 import hooks from './hooks.js'
 import routes from './routes.js'
@@ -51,14 +51,23 @@ export async function createServer () {
   })
   // Top-level error handler
   process.on('unhandledRejection', (reason, p) => {
-    console.log(reason, p)
     app.logger.error('Unhandled Rejection: ', reason)
+  })
+  process.on('SIGINT', async () => {
+    app.logger.info('Received SIGINT signal running teardown')
+    await app.teardown()
+    process.exit(0)
+  })
+  process.on('SIGTERM', async () => {
+    app.logger.info('Received SIGTERM signal running teardown')
+    await app.teardown()
+    process.exit(0)
   })
 
   const port = app.get('port')
   app.logger.info('Configuring HTTP server at port ' + port.toString())
   const server = await app.listen(port)
-  server.on('close', () => distribution.finalize(app))
+  server.on('close', () => finalize(app))
   server.app = app
   server.app.logger.info('Server started listening')
 
