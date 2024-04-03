@@ -58,6 +58,7 @@ export async function createServer () {
   const port = app.get('port')
   app.logger.info('Configuring HTTP server at port ' + port.toString())
   const server = await app.listen(port)
+  server.on('close', () => distribution.finalize(app))
   server.app = app
   server.app.logger.info('Server started listening')
 
