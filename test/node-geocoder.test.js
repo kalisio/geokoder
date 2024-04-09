@@ -89,7 +89,7 @@ describe('geokoder:node-geocoder', () => {
 
   // Cleanup
   after(async () => {
-    //if (server) await server.close()
+    // if (server) await server.close()
     await app.teardown()
     fs.emptyDirSync(path.join(__dirname, 'logs'))
   })

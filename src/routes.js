@@ -20,6 +20,7 @@ export default function (app) {
   const __filename = fileURLToPath(import.meta.url)
   const __dirname = path.dirname(__filename)
   const packageInfo = fs.readJsonSync(path.join(__dirname, '..', 'package.json'))
+  const paginate = app.get('paginate')
 
   app.get('/healthcheck', (req, res, next) => {
     const response = {
@@ -61,6 +62,9 @@ export default function (app) {
     const options = { search: q, filter}
     // Some providers might support additional parameters
     if (_.has(req.query, 'limit')) options.limit = _.toInteger(_.get(req.query, 'limit'))
+    else if (_.has(paginate, 'default.forward')) options.limit = _.get(paginate, 'default.forward')
+    if (_.has(paginate, 'max.forward') && options.limit) options.limit = Math.min(options.limit, _.get(paginate, 'max.forward'))
+
     const all = Providers.get().filter(provider => typeof provider.forward === 'function').map(provider => provider.forward(options))
 
     const response = []
@@ -104,6 +108,8 @@ export default function (app) {
       // Some providers might support additional parameters
       if (_.has(req.query, 'distance')) options.distance = _.toNumber(_.get(req.query, 'distance'))
       if (_.has(req.query, 'limit')) options.limit = _.toInteger(_.get(req.query, 'limit'))
+      else if (_.has(paginate, 'default.reverse')) options.limit = _.get(paginate, 'default.reverse')
+      if (_.has(paginate, 'max.reverse') && options.limit) options.limit = Math.min(options.limit, _.get(paginate, 'max.reverse'))
       
       const all = Providers.get().filter(provider => typeof provider.reverse === 'function').map(provider => provider.reverse(options))
 

@@ -20,6 +20,16 @@ module.exports = {
   port,
   baseUrl,
   apiPath,
+  paginate: {
+    default: {
+      forward: 10,
+      reverse: 10
+    },
+    max: {
+      forward: 25,
+      reverse: 25
+    }
+  },
   providers: {
     // Kano: {},
     // NodeGeocoder: {
