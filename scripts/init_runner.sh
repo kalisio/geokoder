@@ -15,7 +15,7 @@ init_github_run_tests() {
     install_reqs age sops nvm node16 node18 node20 mongo4 mongo5 mongo6 cc_test_reporter
 }
 
-init_github_build_app() {
+init_github_build_service() {
     install_reqs age sops nvm node16
 }
 
