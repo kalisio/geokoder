@@ -35,6 +35,7 @@ init_lib_infos "$ROOT_DIR"
 
 LIB=$(get_lib_name)
 VERSION=$(get_lib_version)
+GIT_TAG=$(get_lib_tag)
 
 echo "About to build ${LIB} v${VERSION}..."
 
@@ -45,7 +46,11 @@ load_value_files "$WORKSPACE_DIR/development/common/KALISIO_DOCKERHUB_PASSWORD.e
 ##
 
 IMAGE_NAME="kalisio/geokoder"
-IMAGE_TAG="latest"
+if [[ -z "$GIT_TAG" ]]; then
+    IMAGE_TAG=latest
+else
+    IMAGE_TAG=$VERSION
+fi
 
 begin_group "Building container ..."
 
