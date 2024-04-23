@@ -1,7 +1,7 @@
 # geokoder
 
 [![Latest Release](https://img.shields.io/github/v/tag/kalisio/geokoder?sort=semver&label=latest)](https://github.com/kalisio/geokoder/releases)
-[![Main CI](https://github.com/kalisio/geokoder/actions/workflows/main.yaml/badge.svg)](https://github.com/kalisio/geokoder/actions/workflows/main.yaml)
+[![CI](https://github.com/kalisio/geokoder/actions/workflows/main.yaml/badge.svg)](https://github.com/kalisio/geokoder/actions/workflows/main.yaml)
 [![Code Climate](https://codeclimate.com/github/kalisio/geokoder/badges/gpa.svg)](https://codeclimate.com/github/kalisio/geokoder)
 [![Test Coverage](https://codeclimate.com/github/kalisio/geokoder/badges/coverage.svg)](https://codeclimate.com/github/kalisio/geokoder/coverage)
 [![Dependency Status](https://img.shields.io/david/kalisio/geokoder.svg?style=flat-square)](https://david-dm.org/kalisio/geokoder)
