@@ -15,7 +15,7 @@ begin_group "Setting up workspace ..."
 
 if [ "$CI" = true ]; then
     WORKSPACE_DIR="$(dirname "$ROOT_DIR")"
-    DEVELOPMENT_REPO_URL="https://$GITHUB_DEVELOPMENT_PAT@github.com/kalisio/development.git"
+    DEVELOPMENT_REPO_URL="https://$GITHUB_DEVELOPMENT_TOKEN@github.com/kalisio/development.git"
 else
     while getopts "b:t" option; do
         case $option in
@@ -36,6 +36,6 @@ else
     git_shallow_clone "$GITHUB_URL/kalisio/geokoder.git" "$WORKSPACE_DIR/geokoder" "${WORKSPACE_TAG:-${WORKSPACE_BRANCH:-}}"
 fi
 
-setup_lib_workspace "$WORKSPACE_DIR" "$DEVELOPMENT_REPO_URL"
+setup_workspace "$WORKSPACE_DIR" "$DEVELOPMENT_REPO_URL"
 
 end_group "Setting up workspace ..."
