@@ -57,7 +57,7 @@
     "glob": "^10.3.10",
     "lodash": "^4.17.21",
     "minimatch": "^9.0.3",
-    "node-fetch": "^3.3.1",
+    "node-fetch": "^3.3.2",
     "node-geocoder": "^4.2.0",
     "winston": "^3.2.1",
     "winston-daily-rotate-file": "^3.10.0",
