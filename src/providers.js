@@ -4,7 +4,8 @@ import makeDebug from 'debug'
 import {
   createKanoProvider,
   createNodeGeocoderProvider,
-  createMBTilesProvider
+  createMBTilesProvider,
+  createGeokoderProvider
 } from './providers/index.js'
 
 const debug = makeDebug('geokoder:providers')
@@ -16,7 +17,8 @@ export const Providers = {
     const results = await Promise.allSettled([
       createKanoProvider(app),
       createNodeGeocoderProvider(app),
-      createMBTilesProvider(app)
+      createMBTilesProvider(app),
+      createGeokoderProvider(app)
     ])
     results.forEach((result) => {
       if (result.status !== 'fulfilled') {

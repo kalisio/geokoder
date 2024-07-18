@@ -12,6 +12,7 @@
   * `Kano` to expose [Kano](https://kalisio.github.io/kano/) catalog layers as sources,
   * `NodeGeocoder` to expose [node-geocoder](https://nchaulet.github.io/node-geocoder/) providers as sources,
   * `MBTiles` to expose layers from [MBTiles](https://wiki.openstreetmap.org/wiki/MBTiles) as sources.
+  * `Geokoder` to proxy request to another geokoder instance, exposing the proxied sources locally with a prefix.
   
 ## API
 
@@ -51,7 +52,7 @@ The query returns the list of matching features, as an array. The service also a
 
 By default, **geokoder** does not expose any sources. You are responsible to write a `local.cjs` file to declare the different sources you want to expose.
 
-Here is an example file that exposes all the sources from the **Kano** provider, `opendatafrance` from the **NodeGeocoder** provider and `api-geo` dataset sources from the **MBTiles** provider:
+Here is an example file that exposes all the sources from the **Kano** provider, `opendatafrance` from the **NodeGeocoder** provider, `api-geo` dataset sources from the **MBTiles** provider and all the sources matching `*hubeau*` from a remote geokoder instance:
 
 ```js
 module.exports = {
@@ -62,6 +63,9 @@ module.exports = {
     },
     MBTiles: {
       'api-geo': { filepath: '/mnt/data/api-geo-5m.mbtiles', layers: ['communes5m', 'epci5m', 'departements5m', 'regions5m'] }
+    },
+    Geokoder: {
+      'some-name': { url: 'https://some.remote.url/blabla', filter: '*hubeau*', headers: { 'Authorization': 'Bearer eyblablablablablabla' } }
     }
   }
 }
@@ -91,6 +95,17 @@ Each key will be a new dataset based on the provided file and exposing some laye
 > NOTE
 > 
 > For performance reason each layer in a dataset should have the same max zoom level, if not two different datasets should be created for now.
+
+#### Geokoder
+
+Each key will generate all the sources that match the defined source `filter` on the remote geokoder instance.
+Eg, if you have a remote geokoder located at `https://some.remote.url/blabla` exposing sources `hubeau-hydro`, `hubeau-piezo`, `opendatafrance` and `api-geo` sources, then the following configuration:
+
+```
+'some-name': { url: 'https://some.remote.url/blabla', filter: '*hubeau*', headers: { 'Authorization': 'Bearer eyblablablablablabla' } }
+```
+
+will expose on the local geokoder `some-name:hubeau-hydro` and `some-name:hubeau-piezo` as if they were local sources.
 
 ### i18n
 

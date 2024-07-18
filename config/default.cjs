@@ -44,6 +44,9 @@ module.exports = {
     //   // Each key will be a new source using the provided file
     //   'admin-express': { filepath: path.join(__dirname, '../data/mbtiles/admin-express.mbtiles'), layers: ['commune', 'departement'] }
     // }
+    // Geokoder: {
+    //   'irsn-planet': { url: 'https://some.url/api', filter: '*hubeau*', headers: { 'Authorization': 'Bearer eyblablabla' }}
+    // }
   },
   i18n,
   logs: {
