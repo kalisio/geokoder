@@ -40,7 +40,7 @@ export async function createNodeGeocoderProvider (app) {
   return {
     name: 'NodeGeocoder',
 
-    capabilities () {
+    capabilities ({ operation }) {
       const caps = geocoders.map((geocoder) => geocoder.name)
       return caps
     },

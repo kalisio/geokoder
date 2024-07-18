@@ -36,8 +36,8 @@ export default function (app) {
 
   app.get('/capabilities/:operation', async (req, res, next) => {
     const operation = _.get(req, 'params.operation')
-    
-    const all = Providers.get().filter(provider => typeof provider[operation] === 'function').map(provider => provider.capabilities())
+    const options = { operation }
+    const all = Providers.get().filter(provider => typeof provider[operation] === 'function').map(provider => provider.capabilities(options))
 
     const response = {
       geocoders: [],

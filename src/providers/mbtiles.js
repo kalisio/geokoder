@@ -44,7 +44,7 @@ export async function createMBTilesProvider (app) {
   return {
     name: 'MBTiles',
 
-    capabilities () {
+    capabilities ({ operation }) {
       return _.reduce(datasets,
         (sources, dataset) => sources.concat(dataset.layers.map(layer => `${dataset.name}:${layer.id}`)),
         [])

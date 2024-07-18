@@ -64,7 +64,7 @@ export async function createKanoProvider (app) {
   return {
     name: 'Kano',
 
-    async capabilities () {
+    async capabilities ({ operation }) {
       const sources = await getSources()
       const caps = sources.map((source) => source.name)
       return caps
