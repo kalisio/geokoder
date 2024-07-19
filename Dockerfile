@@ -1,5 +1,8 @@
+ARG DEBIAN_VERSION=bookworm
+ARG NODE_VERSION=20
+
 # Use a builder
-FROM node:16-bookworm-slim AS builder
+FROM node:${NODE_VERSION}-${DEBIAN_VERSION}-slim AS builder
 
 COPY . /geokoder
 WORKDIR /geokoder
@@ -8,7 +11,7 @@ RUN apt-get update && apt-get install --yes git
 RUN yarn install
 
 # Copy build to slim image
-FROM node:16-bookworm-slim
+FROM node:${NODE_VERSION}-${DEBIAN_VERSION}-slim
 
 LABEL maintainer "<contact@kalisio.xyz>"
 COPY --from=builder --chown=node:node /geokoder /geokoder
