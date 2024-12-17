@@ -6400,10 +6400,10 @@ node-fetch@^3.3.2:
     fetch-blob "^3.1.4"
     formdata-polyfill "^4.0.10"
 
-node-geocoder@^4.2.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/node-geocoder/-/node-geocoder-4.2.0.tgz#340a62636877dc3f8bce3554e9e13bbe85409624"
-  integrity sha512-ZvUiOHWHLVGlrYPvazXj+VQ9oK+EOMinh/5vWoBwOQiV0eCU7GPtEWrMRNnKvmBVOzZHb1eFe9uoKMFeyygMVA==
+node-geocoder@~4.4.1:
+  version "4.4.1"
+  resolved "https://registry.yarnpkg.com/node-geocoder/-/node-geocoder-4.4.1.tgz#f612837dd062ba1084dd33d53f0e81c158694a76"
+  integrity sha512-krx50Gxl4yBgMBhfUhOuNwStzLi+gAYaa46gs0e+ftTvaqLsjKYDFVxC8ff6RLc2f11Gp7Y+R1mkzwsE2c0chw==
   dependencies:
     bluebird "^3.5.2"
     node-fetch "^2.6.0"
