@@ -57,7 +57,7 @@ export async function createGeokoderProvider (app) {
       return sources.map((source) => source.name)
     },
 
-    async forward ({ search, filter, limit }) {
+    async forward ({ search, filter, limit, viewbox }) {
       const sources = await getSources('forward')
       const matchingSources = sources.filter((source) => minimatch(source.name, filter))
 
@@ -68,11 +68,14 @@ export async function createGeokoderProvider (app) {
         else groupedQueries[source.proxy.name].filter += `|${source.upstreamName}`
       }
 
+      const viewboxParam = !_.isNil(viewbox) ?
+            `&viewbox=${viewbox.minLon},${viewbox.minLat},${viewbox.maxLon},${viewbox.maxLat}` : ''
+
       const response = []
       const allReqs = []
       for (const proxyName in groupedQueries) {
         const query = groupedQueries[proxyName]
-        const promise = fetch(`${query.proxy.url}/forward?q=${search}&sources=*(${query.filter})`, { headers: query.proxy.headers })
+        const promise = fetch(`${query.proxy.url}/forward?q=${search}&sources=*(${query.filter})${viewboxParam}`, { headers: query.proxy.headers })
               .then((response) => {
                 if (response.ok) { return response.json() }
                 throw new Error(`Forward query failed on proxy ${proxyName} : fetch status is ${response.status}`)
