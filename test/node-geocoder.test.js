@@ -17,7 +17,9 @@ describe('geokoder:node-geocoder', () => {
   const searches = [
     { pattern: 'Chemin des poireaux, 1100 Castelnaudary', sources: 'openstreetmap', results: [] },
     { pattern: '80 Chemin des tournesols, 11400 Castelnaudary', sources: 'opendatafrance', results: [result] },
-    { pattern: '80 Chemin des tournesols, 11400 Castelnaudary', sources: 'open*', results: [result, result] }
+    { pattern: '80 Chemin des tournesols, 11400 Castelnaudary', sources: 'open*', results: [result, result] },
+    { pattern: '80 Chemin des tournesols, 11400 Castelnaudary', sources: 'opendatafrance', viewbox: '1.891365,43.283502,2.010069,43.340896', results: [result] },
+    { pattern: '80 Chemin des tournesols, 11400 Castelnaudary', sources: 'opendatafrance', viewbox: '-2.915497,45.691553,-2.440681,45.911512', results: [] }
   ]
   const locations = [
     { lat: 45.15493, lon: 3.20801, sources: 'opendatafrance', results: [] },
@@ -60,8 +62,10 @@ describe('geokoder:node-geocoder', () => {
   it('forward geocoding on node geocoder sources', async () => {
     for (let i = 0; i < searches.length; i++) {
       const search = searches[i]
+      const params = [ `q=${search.pattern}`, `sources=${search.sources}`, 'limit=1' ]
+      if (search.viewbox) params.push(`viewbox=${search.viewbox}`)
       const response = await superagent
-        .get(`${app.get('baseUrl')}/forward?q=${search.pattern}&limit=1&sources=${search.sources}`)
+        .get(`${app.get('baseUrl')}/forward?${params.join('&')}`)
       expect(response.body.length).to.equal(search.results.length)
       response.body.forEach((feature, index) => {
         const result = search.results[index]

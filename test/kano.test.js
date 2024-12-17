@@ -18,7 +18,9 @@ describe('geokoder:kano', () => {
   const searches = [
     { pattern: 'xxx', sources: 'kano:teleray-stations', results: [] },
     { pattern: 'aye', sources: 'kano:teleray-stations', results: ['BLAYE'] },
-    { pattern: 'chin', sources: 'kano:*', results: ['CHINON', 'Chinon-B1', 'Chinon-B2'] }
+    { pattern: 'chin', sources: 'kano:*', results: ['CHINON', 'Chinon-B1', 'Chinon-B2'] },
+    { pattern: 'chin', sources: 'kano:*', viewbox: '0.119305,47.110446,0.356712,47.217705', results: ['CHINON'] },
+    { pattern: 'chin', sources: 'kano:*', viewbox: '-2.915497,45.691553,-2.440681,45.911512', results: [] }
   ]
   const locations = [
     { lat: 47.16, lon: 0.24, distance: 0, sources: 'kano:teleray-stations', results: [] },
@@ -125,8 +127,10 @@ describe('geokoder:kano', () => {
   it('forward geocoding on kano sources from catalog', async () => {
     for (let i = 0; i < searches.length; i++) {
       const search = searches[i]
+      const params = [ `q=${search.pattern}`, `sources=${search.sources}` ]
+      if (search.viewbox) params.push(`viewbox=${search.viewbox}`)
       const response = await superagent
-        .get(`${app.get('baseUrl')}/forward?q=${search.pattern}&sources=${search.sources}`)
+        .get(`${app.get('baseUrl')}/forward?${params.join('&')}`)
       expect(response.body.length).to.equal(search.results.length)
       response.body.forEach((feature, index) => {
         expect(_.get(feature, 'properties.name', '')).to.equal(search.results[index])
@@ -174,8 +178,10 @@ describe('geokoder:kano', () => {
   it('forward geocoding on kano sources from services', async () => {
     for (let i = 0; i < searches.length; i++) {
       const search = searches[i]
+      const params = [ `q=${search.pattern}`, `sources=${search.sources.replace('kano', 'services')}` ]
+      if (search.viewbox) params.push(`viewbox=${search.viewbox}`)
       const response = await superagent
-        .get(`${app.get('baseUrl')}/forward?q=${search.pattern}&sources=${search.sources.replace('kano', 'services')}`)
+        .get(`${app.get('baseUrl')}/forward?${params.join('&')}`)
       expect(response.body.length).to.equal(search.results.length)
       response.body.forEach((feature, index) => {
         expect(_.get(feature, 'properties.name', '')).to.equal(search.results[index])
