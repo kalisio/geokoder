@@ -74,6 +74,7 @@ export async function createNodeGeocoderProvider (app) {
         } else {
           query = search
         }
+        debug(`Requesting impl ${geocoder.name} with query`, query)
         const request = geocoder.impl.geocode(query)
         request.source = geocoder
         requests.push(request)
