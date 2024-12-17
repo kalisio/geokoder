@@ -26,10 +26,11 @@ Returns the list of available geocoding sources according to the target operatio
 * `forward` for forward geocoding
 * `reverse` for reverse geocoding
 
-### /forward?q=searchString&sources=filterPattern (GET)
+### /forward?q=searchString[&sources=filterPattern][&viewbox=lon1,lat1,lon2,lat2] (GET)
 
 Performs *forward* geocoding. Requires at least the `q` parameter which is the string that'll be searched in the geocoding sources.
 The query supports an optional `sources` allowing users to only perform geocoding in matching sources. The source matching is based on [minimatch](https://github.com/isaacs/minimatch#minimatch).
+It also supports the optional `viewbox` parameter, specifying a bounding box to restrict returned matching features. Any two corner points of the box are accepted as long as they make a proper box.
 
 The query returns the list of matching features, as an array. Each feature is given a relevance score, and the returned array is sorted based on this value. The service also add to each feature and additional `geokoder` object containing the following fields:
   - `source` specifies in which source this feature was found
