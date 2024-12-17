@@ -45,16 +45,36 @@ export async function createNodeGeocoderProvider (app) {
       return caps
     },
 
-    async forward ({ search, filter, limit }) {
+    async forward ({ search, filter, limit, viewbox }) {
       const matchingSources = geocoders.filter(geocoder => minimatch(geocoder.name, filter))
 
       const requests = []
       // issue requests to geocoders
       debug(`Requesting ${matchingSources.length} matching sources`, _.map(matchingSources, 'name'))
       for (const geocoder of matchingSources) {
-        const request = (!_.isNil(limit)
-          ? (geocoder.name === 'openstreetmap' ? geocoder.impl.geocode({ q: search, limit }) : geocoder.impl.geocode({ address: search, limit }))
-          : geocoder.impl.geocode(search))
+        let query = {}
+        if (geocoder.name === 'openstreetmap') {
+          query.q = search
+          if (!_.isNil(limit)) query.limit = limit
+          if (!_.isNil(viewbox)) {
+            // make a viewbox bounded query
+            // cf. https://nominatim.org/release-docs/latest/api/Search/#result-restriction
+            query.viewbox = `${viewbox.minLon},${viewbox.minLat},${viewbox.maxLon},${viewbox.maxLat}`
+            query.bounded = 1
+          }
+        } else if (geocoder.name === 'opendatafrance') {
+          query.address = search
+          if (!_.isNil(limit)) query.limit = limit
+          if (!_.isNil(viewbox)) {
+            // use lat,lon to focus in the viewbox
+            // cf. https://adresse.data.gouv.fr/api-doc/adresse
+            query.lat = viewbox.minLat + ((viewbox.maxLat - viewbox.minLat) / 2)
+            query.lon = viewbox.minLon + ((viewbox.maxLon - viewbox.minLon) / 2)
+          }
+        } else {
+          query = search
+        }
+        const request = geocoder.impl.geocode(query)
         request.source = geocoder
         requests.push(request)
       }
