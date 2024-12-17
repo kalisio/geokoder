@@ -70,7 +70,7 @@ export async function createKanoProvider (app) {
       return caps
     },
 
-    async forward ({ search, filter, limit }) {
+    async forward ({ search, filter, limit, viewbox }) {
       const sources = await getSources()
       const matchingSources = sources.filter((source) => minimatch(source.name, filter))
 
@@ -83,6 +83,16 @@ export async function createKanoProvider (app) {
           const searches = source.keys.map((key) => { return { [key]: { $search: search } } })
           const query = source.keys.length === 1 ? searches[0] : { $or: searches }
           if (!_.isNil(limit)) query.$limit = limit
+          if (!_.isNil(viewbox)) {
+            query.geometry = {
+              $geoIntersects: {
+                $geometry: {
+                  type: "Polygon",
+                  coordinates: [[[viewbox.minLon, viewbox.minLat], [viewbox.minLon, viewbox.maxLat], [viewbox.maxLon, viewbox.maxLat], [viewbox.maxLon, viewbox.minLat], [viewbox.minLon, viewbox.minLat]]]
+                }
+              }
+            }
+          }
           debug(`Requesting source ${source.name} with query`, query)
           const request = service.find({ query })
           request.source = source
