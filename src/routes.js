@@ -59,7 +59,21 @@ export default function (app) {
   app.get('/forward', async (req, res, next) => {
     const q = _.get(req.query, 'q')
     const filter = _.get(req.query, 'sources', '*')
+    const viewbox = _.get(req.query, 'viewbox', '')
     const options = { search: q, filter}
+    if (viewbox) {
+      // viewbox is expected as 'lon1,lat1,lon2,lat2'
+      // parse as float and check validity
+      const coords = viewbox.split(',').map(e => parseFloat(e))
+      if (coords.length >= 4 && coords.every(e => e != NaN)) {
+        options.viewbox = {
+          minLon: Math.min(coords[0], coords[2]),
+          maxLon: Math.max(coords[0], coords[2]),
+          minLat: Math.min(coords[1], coords[3]),
+          maxLat: Math.max(coords[1], coords[3])
+        }
+      }
+    }
     // Some providers might support additional parameters
     if (_.has(req.query, 'limit')) options.limit = _.toInteger(_.get(req.query, 'limit'))
     else if (_.has(paginate, 'default.forward')) options.limit = _.get(paginate, 'default.forward')
@@ -77,6 +91,16 @@ export default function (app) {
 
       result.value.forEach((entry) => {
         const normalized = entry.feature
+
+        if (!_.isNil(options.viewbox)) {
+          // filter out features outside the viewbox if provided
+          if ((normalized.geometry.coordinates[0] < options.viewbox.minLon) ||
+              (normalized.geometry.coordinates[0] > options.viewbox.maxLon) ||
+              (normalized.geometry.coordinates[1] < options.viewbox.minLat) ||
+              (normalized.geometry.coordinates[1] > options.viewbox.maxLat))
+              return
+        }
+
         normalized.geokoder = {
           source: entry.source,
           match: entry.match,
