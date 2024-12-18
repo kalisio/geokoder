@@ -83,16 +83,7 @@ export async function createKanoProvider (app) {
           const searches = source.keys.map((key) => { return { [key]: { $search: search } } })
           const query = source.keys.length === 1 ? searches[0] : { $or: searches }
           if (!_.isNil(limit)) query.$limit = limit
-          if (!_.isNil(viewbox)) {
-            query.geometry = {
-              $geoIntersects: {
-                $geometry: {
-                  type: "Polygon",
-                  coordinates: [[[viewbox.minLon, viewbox.minLat], [viewbox.minLon, viewbox.maxLat], [viewbox.maxLon, viewbox.maxLat], [viewbox.maxLon, viewbox.minLat], [viewbox.minLon, viewbox.minLat]]]
-                }
-              }
-            }
-          }
+          if (!_.isNil(viewbox)) Object.assign(query, { south: viewbox.minLat, north: viewbox.maxLat, west: viewbox.minLon, east: viewbox.maxLon })
           debug(`Requesting source ${source.name} with query`, query)
           const request = service.find({ query })
           request.source = source
