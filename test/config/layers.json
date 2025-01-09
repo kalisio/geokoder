@@ -26,6 +26,32 @@
     "bbox": [2.05338918702, -54.5247541978, 9.56001631027, 51.1485061713]
   },
   {
+    "name": "Layers.DUPLICATE_TELERAY",
+    "description": "Layers.DUPLICATE_TELERAY_DESCRIPTION",
+    "i18n": {
+      "fr": {
+        "Layers": {
+          "DUPLICATE_TELERAY": "Téléray",
+          "DUPLICATE_TELERAY_DESCRIPTION": "Données Téléray"
+        }
+      },
+      "en": {
+        "Layers": {
+          "DUPLICATE_TELERAY": "Téléray",
+          "DUPLICATE_TELERAY_DESCRIPTION": "Téléray data"
+        }
+      }
+    },
+    "type" : "OverlayLayer",
+    "service": "teleray-duplicate-observations",
+    "probeService": "teleray-stations",
+    "featureId": "irsnId",
+    "featureLabel": "name",
+    "from": "P-7D",
+    "to": "PT-10M",
+    "bbox": [2.05338918702, -54.5247541978, 9.56001631027, 51.1485061713]
+  },
+  {
     "name": "Layers.RTE",
     "description": "Layers.RTE_DESCRIPTION",
     "i18n": {

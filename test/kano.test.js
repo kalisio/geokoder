@@ -124,10 +124,33 @@ describe('geokoder:kano', () => {
   // Let enough time to process
     .timeout(10000)
 
+  it('kano provider should not expose duplicate sources', async () => {
+    let response = await superagent
+      .get(`${app.get('baseUrl')}/capabilities/forward`)
+    expect(response.body.geocoders).toExist()
+    const seen = new Set()
+    response.body.geocoders.forEach((src) => {
+      if (!src.startsWith('kano:')) return
+      expect(seen.has(src)).beFalse()
+      seen.add(src)
+    })
+    response = await superagent
+      .get(`${app.get('baseUrl')}/capabilities/reverse`)
+    expect(response.body.geocoders).toExist()
+    seen.clear()
+    response.body.geocoders.forEach((src) => {
+      if (!src.startsWith('kano:')) return
+      expect(seen.has(src)).beFalse()
+      seen.add(src)
+    })
+  })
+  // Let enough time to process
+    .timeout(10000)
+
   it('forward geocoding on kano sources from catalog', async () => {
     for (let i = 0; i < searches.length; i++) {
       const search = searches[i]
-      const params = [ `q=${search.pattern}`, `sources=${search.sources}` ]
+      const params = [`q=${search.pattern}`, `sources=${search.sources}`]
       if (search.viewbox) params.push(`viewbox=${search.viewbox}`)
       const response = await superagent
         .get(`${app.get('baseUrl')}/forward?${params.join('&')}`)
@@ -178,7 +201,7 @@ describe('geokoder:kano', () => {
   it('forward geocoding on kano sources from services', async () => {
     for (let i = 0; i < searches.length; i++) {
       const search = searches[i]
-      const params = [ `q=${search.pattern}`, `sources=${search.sources.replace('kano', 'services')}` ]
+      const params = [`q=${search.pattern}`, `sources=${search.sources.replace('kano', 'services')}`]
       if (search.viewbox) params.push(`viewbox=${search.viewbox}`)
       const response = await superagent
         .get(`${app.get('baseUrl')}/forward?${params.join('&')}`)

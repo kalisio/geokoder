@@ -38,8 +38,9 @@ export async function createKanoProvider (app) {
           const featureLabels = _.castArray(layer.featureLabel).map((prop) => `properties.${prop}`)
           // Make sure we don't already expose a source from the same collection
           const known = sources.find((src) => src.collection === collection)
-          if (!known)
+          if (!known) {
             sources.push({ name: `kano:${collection}`, collection, keys: featureLabels })
+          }
         })
       }
       // Otherwise try to retrieve available services as if they are
