@@ -69,13 +69,20 @@ export async function createMBTilesProvider (app) {
         const x = long2tile(lon, z)
         const y = lat2tile(lat, z)
         // Load tile
-        const gzip = await new Promise((resolve, reject) => {
-          dataset.mbtiles.getTile(z, x, y, (err, data, headers) => {
-            debug(`Retrieved tile ${x}, ${y}, ${z} for location (${lon}, ${lat})`)
-            if (err) reject(err)
-            else resolve(data)
+        let gzip
+        try {
+          gzip = await new Promise((resolve, reject) => {
+            dataset.mbtiles.getTile(z, x, y, (err, data, headers) => {
+              debug(`${dataset.name}: retrieving tile ${x}, ${y}, ${z} for location (${lon}, ${lat})`)
+              if (err) reject(err)
+              else resolve(data)
+            })
           })
-        })
+        } catch (err) {
+          // It's ok to fail here, not every dataset covers the whole coordinate space
+          debug(`${dataset.name}: couldn't find tile for location ${lon}, ${lat}, skipping.`)
+          continue
+        }
         // For debug purpose
         // fs.writeFileSync('test.mvt.gz', gzip)
         const data = await new Promise((resolve, reject) => {
@@ -91,7 +98,7 @@ export async function createMBTilesProvider (app) {
         // Defaults to "point in polygon" query, otherwise specify a distance to search for nearby locations
         const radius = _.isNil(distance) ? 0 : distance
         limit = _.isNil(limit) ? 10 : limit
-        debug(`Requesting layers ${layers} with radius ${radius} and limit ${limit}`)
+        debug(`${dataset.name}: requesting layers ${layers} with radius ${radius} and limit ${limit}`)
         // Then return a feature
         const geoJson = await new Promise((resolve, reject) => {
           vtquery([{
@@ -108,7 +115,7 @@ export async function createMBTilesProvider (app) {
           return Object.assign({ source }, { feature: _.omit(feature, ['properties.tilequery']) })
         })
         responses = responses.concat(features)
-        debug(`Retrieved ${features.length} features from dataset ${dataset.name}`)
+        debug(`${dataset.name}: retrieved ${features.length} features from dataset`)
       }
       return responses
     }
