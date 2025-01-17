@@ -63,26 +63,37 @@ export async function createMBTilesProvider (app) {
       let responses = []
       debug(`Requesting ${matchingDatasets.length} matching datasets`, _.map(matchingDatasets, 'name'))
       for (const dataset of matchingDatasets) {
-        // Find tile for position
-        // FIXME: we assume the same zoom level for all layers
-        const z = _.get(dataset, 'layers[0].maxzoom')
-        const x = long2tile(lon, z)
-        const y = lat2tile(lat, z)
-        // Load tile
-        let gzip
-        try {
-          gzip = await new Promise((resolve, reject) => {
-            dataset.mbtiles.getTile(z, x, y, (err, data, headers) => {
-              debug(`${dataset.name}: retrieving tile ${x}, ${y}, ${z} for location (${lon}, ${lat})`)
-              if (err) reject(err)
-              else resolve(data)
+        // Take filter into account
+        const layers = dataset.layers.filter(layer => minimatch(`${dataset.name}:${layer.id}`, filter))
+        // Compute maxzoom range among allowed layers
+        const maxzoom = layers.reduce((acc, layer) => { return { min: Math.min(acc.min, layer.maxzoom), max: Math.max(acc.max, layer.maxzoom) } }, { min: Number.MAX_VALUE, max: 0 })
+
+        // Find tile for position, we may try different z values since not every
+        // layer covers the same max z levels
+        let x, y, z = maxzoom.max
+        let gzip = null
+        while (z >= maxzoom.min && !gzip) {
+          x = long2tile(lon, z)
+          y = lat2tile(lat, z)
+          try {
+            gzip = await new Promise((resolve, reject) => {
+              dataset.mbtiles.getTile(z, x, y, (err, data, headers) => {
+                debug(`${dataset.name}: retrieving tile ${x}, ${y}, ${z} for location (${lon}, ${lat})`)
+                if (err) reject(err)
+                else resolve(data)
+              })
             })
-          })
-        } catch (err) {
-          // It's ok to fail here, not every dataset covers the whole coordinate space
+          } catch (err) {
+            // It's ok to fail here, not every dataset covers the whole coordinate space
+            debug(`${dataset.name}: couldn't find tile for location ${lon}, ${lat} @ level ${z}, skipping.`)
+            --z
+          }
+        }
+        if (!gzip) {
           debug(`${dataset.name}: couldn't find tile for location ${lon}, ${lat}, skipping.`)
           continue
         }
+
         // For debug purpose
         // fs.writeFileSync('test.mvt.gz', gzip)
         const data = await new Promise((resolve, reject) => {
@@ -93,18 +104,17 @@ export async function createMBTilesProvider (app) {
         })
         // For debug purpose
         // fs.writeFileSync('test.mvt', data)
-        // Take filter into account
-        const layers = dataset.layers.filter(layer => minimatch(`${dataset.name}:${layer.id}`, filter)).map(layer => layer.id)
+        const layerNames = layers.map(layer => layer.id)
         // Defaults to "point in polygon" query, otherwise specify a distance to search for nearby locations
         const radius = _.isNil(distance) ? 0 : distance
         limit = _.isNil(limit) ? 10 : limit
-        debug(`${dataset.name}: requesting layers ${layers} with radius ${radius} and limit ${limit}`)
+        debug(`${dataset.name}: requesting layers ${layerNames} with radius ${radius} and limit ${limit}`)
         // Then return a feature
         const geoJson = await new Promise((resolve, reject) => {
           vtquery([{
             buffer: data, x, y, z
           }], [lon, lat], {
-            radius, limit, layers
+            radius, limit, layerNames
           }, (err, result) => {
             if (err) reject(err)
             else resolve(result)
