@@ -26,11 +26,15 @@ Returns the list of available geocoding sources according to the target operatio
 * `forward` for forward geocoding
 * `reverse` for reverse geocoding
 
-### /forward?q=searchString[&sources=filterPattern][&viewbox=lon1,lat1,lon2,lat2] (GET)
+### /forward?q=searchString[&sources=filterPattern][&viewbox=lon1,lat1,lon2,lat2][&limit=10] (GET)
 
 Performs *forward* geocoding. Requires at least the `q` parameter which is the string that'll be searched in the geocoding sources.
 The query supports an optional `sources` allowing users to only perform geocoding in matching sources. The source matching is based on [minimatch](https://github.com/isaacs/minimatch#minimatch).
 It also supports the optional `viewbox` parameter, specifying a bounding box to restrict returned matching features. Any two corner points of the box are accepted as long as they make a proper box.
+The optional `limit` query parameter allows to limit the number of results returned **per source**. That means if you have a total of `5` sources and you query using a limit of `2`, you'll get at most 10 results.
+
+> [!NOTE]
+> The `NodeGeocoder` sources (`opendatafrance`, `openstreetmap`, ...) use a limit of 10 results per source by default if none is specified in the query.
 
 The query returns the list of matching features, as an array. Each feature is given a relevance score, and the returned array is sorted based on this value. The service also add to each feature and additional `geokoder` object containing the following fields:
   - `source` specifies in which source this feature was found
