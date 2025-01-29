@@ -45,7 +45,9 @@ The query returns the list of matching features, as an array. Each feature is gi
 
 ### /reverse?lat=latValue&lon=lonValue&sources=filterPattern (GET)
 
-Performs *reverse* geocoding at the given point. Requires at least the `lat` and `lon` parameters which is the location that'll be searched in the geocoding sources. The query supports an optional `sources` allowing users to only perform reverse geocoding in matching sources. The source matching is based on [minimatch](https://github.com/isaacs/minimatch#minimatch). Some providers could support additional parameters:
+Performs *reverse* geocoding at the given point. Requires at least the `lat` and `lon` parameters which is the location that'll be searched in the geocoding sources.
+Additional query parameters include:
+  - `sources`: allows users to only perform reverse geocoding in matching sources. The source matching is based on [minimatch](https://github.com/isaacs/minimatch#minimatch).
   - `limit` the number of maximum items to get in the response
   - `distance` the maximum distance of items to be included in the response (useful for nearby location query not much for point in polygon query)
 
