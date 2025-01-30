@@ -4,7 +4,7 @@ import path from 'path'
 import _ from 'lodash'
 import errors from '@feathersjs/errors'
 import makeDebug from 'debug'
-import { scoreResult } from './scoring.js'
+import { scoreForwardResults, scoreReverseResults, sortAndLimitResults } from './scoring.js'
 import { Providers } from './providers.js'
 
 const debug = makeDebug('geokoder:routes')
@@ -104,21 +104,15 @@ export default function (app) {
         normalized.geokoder = {
           source: entry.source,
           match: entry.match,
-          matchProp: entry.matchProp,
-          score: scoreResult(q.toUpperCase(), entry.match.toUpperCase())
+          matchProp: entry.matchProp
         }
         response.push(normalized)
       })
     })
 
-    // sort by score
-    response.sort((a, b) => {
-      return a.geokoder.score < b.geokoder.score
-        ? 1
-        : a.geokoder.score > b.geokoder.score
-          ? -1
-          : 0
-    })
+    // score and sort results
+    scoreForwardResults(q, response)
+    sortAndLimitResults(response, option.limit)
 
     res.json(response)
   })
@@ -149,12 +143,14 @@ export default function (app) {
           const normalized = entry.feature
           normalized.geokoder = {
             source: entry.source
-            // TODO: score by distance ?
-            // score: scoreResult(q.toUpperCase(), entry.match.toUpperCase())
           }
           response.push(normalized)
         })
       })
+
+      // score and sort results
+      scoreReverseResults(lon, lat, response)
+      sortAndLimitResults(response, options.limit)
 
       res.json(response)
     } else {

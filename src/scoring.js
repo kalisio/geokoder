@@ -1,3 +1,5 @@
+import { distance } from '@turf/distance'
+
 // https://github.com/richmilne/JaroWinkler/blob/master/jaro/strcmp95.c
 // https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance
 
@@ -49,6 +51,52 @@ function jaroWinklerSimilarity (s1, s2) {
   return jaro + (prefix * 0.1 * (1 - jaro))
 }
 
-export function scoreResult (needle, result) {
-  return jaroWinklerSimilarity(needle, result)
+export function sortAndLimitResults (results, limit) {
+  // Sort based on computed score [0, 1] 1 is best
+  results.sort((a, b) => {
+    return a.geokoder.score < b.geokoder.score
+      ? 1
+      : a.geokoder.score > b.geokoder.score
+        ? -1
+        : 0
+  })
+
+  if (limit > 0)
+    results.length = Math.min(results.length, limit)
+}
+
+export function scoreForwardResults (query, results) {
+  // Compute a [0, 1] score based on string similarity 1 = best
+  results.forEach((result) => {
+    result.geokoder.score = jaroWinklerSimilarity(query.toUpperCase(), result.match.toUpperCase())
+  })
+}
+
+export function scoreReverseResults (queryLon, queryLat, results) {
+  let maxDistance = 0
+  let minDistance = Number.MAX_VALUE
+
+  // First compute distance from result to query location
+  results.forEach((result) => {
+    const geometry = result.geometry
+    if (geometry.type === 'Point') {
+      result.geokoder.distance = distance([queryLon, queryLat], geometry.coordinates)
+    } else {
+      // TODO: doesn't handle other type of geomerty yet
+      // @turf/point-to-line-distance and @turf/point-to-polygon-distance may help
+      result.geokoder.distance = 0.0
+    }
+
+    // Keep track of min/max distance to compute relevance score [0, 1]
+    maxDistance = Math.max(maxDistance, result.geokoder.distance)
+    minDistance = Math.min(minDistance, result.geokoder.distance)
+  })
+
+  // Now compute score [0, 1] 1 is best => map between min and max distances
+  const distanceDelta = maxDistance - minDistance
+  results.forEach((result) => {
+    result.geokoder.score = distanceDelta !== 0
+      ? 1.0 - ((result.geokoder.distance - minDistance) / distanceDelta)
+      : 1.0
+  })
 }
