@@ -70,7 +70,7 @@ export async function createMBTilesProvider (app) {
 
         // Find tile for position, we may try different z values since not every
         // layer covers the same max z levels
-        let x, y, z = maxzoom.max
+        let x; let y; let z = maxzoom.max
         let gzip = null
         while (z >= maxzoom.min && !gzip) {
           x = long2tile(lon, z)

@@ -62,7 +62,7 @@ describe('geokoder:node-geocoder', () => {
   it('forward geocoding on node geocoder sources', async () => {
     for (let i = 0; i < searches.length; i++) {
       const search = searches[i]
-      const params = [ `q=${search.pattern}`, `sources=${search.sources}`, 'limit=2' ]
+      const params = [`q=${search.pattern}`, `sources=${search.sources}`, 'limit=2']
       if (search.viewbox) params.push(`viewbox=${search.viewbox}`)
       const response = await superagent
         .get(`${app.get('baseUrl')}/forward?${params.join('&')}`)

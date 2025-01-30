@@ -25,23 +25,23 @@ export async function createGeokoderProvider (app) {
 
   debug(`found ${proxies.length} proxies`)
 
-  async function getSources(op) {
+  async function getSources (op) {
     const sources = []
     const allReqs = []
     for (const proxy of proxies) {
       const promise = fetch(`${proxy.url}/capabilities/${op}`, { headers: proxy.headers })
-            .then((response) => {
-              if (response.ok) { return response.json() }
-              throw new Error(`Capability query failed on proxy ${proxy.name} : fetch status is ${response.status}`)
-            }).then((json) => {
-              for (const source of json.geocoders) {
-                if (minimatch(source, proxy.filter)) {
-                  sources.push({ name: `${proxy.name}:${source}`, upstreamName: source, proxy })
-                }
-              }
-            }).catch((error) => {
-              debug(error)
-            })
+        .then((response) => {
+          if (response.ok) { return response.json() }
+          throw new Error(`Capability query failed on proxy ${proxy.name} : fetch status is ${response.status}`)
+        }).then((json) => {
+          for (const source of json.geocoders) {
+            if (minimatch(source, proxy.filter)) {
+              sources.push({ name: `${proxy.name}:${source}`, upstreamName: source, proxy })
+            }
+          }
+        }).catch((error) => {
+          debug(error)
+        })
       allReqs.push(promise)
     }
 
@@ -68,31 +68,33 @@ export async function createGeokoderProvider (app) {
         else groupedQueries[source.proxy.name].filter += `|${source.upstreamName}`
       }
 
-      const limitParam = !_.isNil(limit) ?
-            `&limit=${limit}` : ''
-      const viewboxParam = !_.isNil(viewbox) ?
-            `&viewbox=${viewbox.minLon},${viewbox.minLat},${viewbox.maxLon},${viewbox.maxLat}` : ''
+      const limitParam = !_.isNil(limit)
+        ? `&limit=${limit}`
+        : ''
+      const viewboxParam = !_.isNil(viewbox)
+        ? `&viewbox=${viewbox.minLon},${viewbox.minLat},${viewbox.maxLon},${viewbox.maxLat}`
+        : ''
 
       const response = []
       const allReqs = []
       for (const proxyName in groupedQueries) {
         const query = groupedQueries[proxyName]
         const promise = fetch(`${query.proxy.url}/forward?q=${search}&sources=*(${query.filter})${viewboxParam}${limitParam}`, { headers: query.proxy.headers })
-              .then((response) => {
-                if (response.ok) { return response.json() }
-                throw new Error(`Forward query failed on proxy ${proxyName} : fetch status is ${response.status}`)
-              }).then((json) => {
-                for (const result of json) {
-                  response.push({
-                    feature: _.omit(result, [ 'geokoder' ]),
-                    source: `${proxyName}:${result.geokoder.source}`,
-                    match: result.geokoder.match,
-                    matchProp: result.geokoder.matchProp
-                  })
-                }
-              }).catch((error) => {
-                debug(error)
+          .then((response) => {
+            if (response.ok) { return response.json() }
+            throw new Error(`Forward query failed on proxy ${proxyName} : fetch status is ${response.status}`)
+          }).then((json) => {
+            for (const result of json) {
+              response.push({
+                feature: _.omit(result, ['geokoder']),
+                source: `${proxyName}:${result.geokoder.source}`,
+                match: result.geokoder.match,
+                matchProp: result.geokoder.matchProp
               })
+            }
+          }).catch((error) => {
+            debug(error)
+          })
         allReqs.push(promise)
       }
 
@@ -111,29 +113,31 @@ export async function createGeokoderProvider (app) {
         else groupedQueries[source.proxy.name].filter += `|${source.upstreamName}`
       }
 
-      const limitParam = !_.isNil(limit) ?
-            `&limit=${limit}` : ''
-      const distanceParam = !_.isNil(distance) ?
-            `&distance=${distance}` : ''
+      const limitParam = !_.isNil(limit)
+        ? `&limit=${limit}`
+        : ''
+      const distanceParam = !_.isNil(distance)
+        ? `&distance=${distance}`
+        : ''
 
       const response = []
       const allReqs = []
       for (const proxyName in groupedQueries) {
         const query = groupedQueries[proxyName]
         const promise = fetch(`${query.proxy.url}/reverse?lat=${lat}&lon=${lon}&sources=*(${query.filter})${distanceParam}${limitParam}`, { headers: query.proxy.headers })
-              .then((response) => {
-                if (response.ok) { return response.json() }
-                throw new Error(`Reverse query failed on proxy ${proxyName} : fetch status is ${response.status}`)
-              }).then((json) => {
-                for (const result of json) {
-                  response.push({
-                    feature: _.omit(result, [ 'geokoder' ]),
-                    source: `${proxyName}:${result.geokoder.source}`,
-                  })
-                }
-              }).catch((error) => {
-                debug(error)
+          .then((response) => {
+            if (response.ok) { return response.json() }
+            throw new Error(`Reverse query failed on proxy ${proxyName} : fetch status is ${response.status}`)
+          }).then((json) => {
+            for (const result of json) {
+              response.push({
+                feature: _.omit(result, ['geokoder']),
+                source: `${proxyName}:${result.geokoder.source}`
               })
+            }
+          }).catch((error) => {
+            debug(error)
+          })
         allReqs.push(promise)
       }
 
