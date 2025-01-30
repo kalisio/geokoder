@@ -68,6 +68,8 @@ export async function createGeokoderProvider (app) {
         else groupedQueries[source.proxy.name].filter += `|${source.upstreamName}`
       }
 
+      const limitParam = !_.isNil(limit) ?
+            `&limit=${limit}` : ''
       const viewboxParam = !_.isNil(viewbox) ?
             `&viewbox=${viewbox.minLon},${viewbox.minLat},${viewbox.maxLon},${viewbox.maxLat}` : ''
 
@@ -75,7 +77,7 @@ export async function createGeokoderProvider (app) {
       const allReqs = []
       for (const proxyName in groupedQueries) {
         const query = groupedQueries[proxyName]
-        const promise = fetch(`${query.proxy.url}/forward?q=${search}&sources=*(${query.filter})${viewboxParam}`, { headers: query.proxy.headers })
+        const promise = fetch(`${query.proxy.url}/forward?q=${search}&sources=*(${query.filter})${viewboxParam}${limitParam}`, { headers: query.proxy.headers })
               .then((response) => {
                 if (response.ok) { return response.json() }
                 throw new Error(`Forward query failed on proxy ${proxyName} : fetch status is ${response.status}`)
@@ -109,11 +111,16 @@ export async function createGeokoderProvider (app) {
         else groupedQueries[source.proxy.name].filter += `|${source.upstreamName}`
       }
 
+      const limitParam = !_.isNil(limit) ?
+            `&limit=${limit}` : ''
+      const distanceParam = !_.isNil(distance) ?
+            `&distance=${distance}` : ''
+
       const response = []
       const allReqs = []
       for (const proxyName in groupedQueries) {
         const query = groupedQueries[proxyName]
-        const promise = fetch(`${query.proxy.url}/reverse?lat=${lat}&lon=${lon}&sources=*(${query.filter})`, { headers: query.proxy.headers })
+        const promise = fetch(`${query.proxy.url}/reverse?lat=${lat}&lon=${lon}&sources=*(${query.filter})${distanceParam}${limitParam}`, { headers: query.proxy.headers })
               .then((response) => {
                 if (response.ok) { return response.json() }
                 throw new Error(`Reverse query failed on proxy ${proxyName} : fetch status is ${response.status}`)
