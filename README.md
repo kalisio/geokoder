@@ -51,7 +51,7 @@ Additional query parameters include:
   - `distance` the maximum distance of items to be included in the response (useful for nearby location query not much for point in polygon query)
   - `limit`: limit the number of results in the response. If not provided in the query it'll use the value defined in the `paginate.default.reverse` config key. It's also capped using the `paginate.max.reverse` value.
 
-The query returns the list of matching features, as an array. The service also add to each feature and additional `geokoder` object containing the following fields:
+The query returns the list of matching features, as an array. Each feature is given a relevance score, and the returned array is sorted based on this value. The service also add to each feature and additional `geokoder` object containing the following fields:
   - `source` specifies in which source this feature was found
   - `distance` indicates the distance between the query location and the feature (currently only computed when the feature is a point).
   - `score` is the computed relevance score. This score is included in the `[0, 1]` range, with `1.0` being the most relevant result. The score computation is based on the feature distance to the query location.
