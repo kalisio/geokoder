@@ -62,7 +62,7 @@ describe('geokoder:node-geocoder', () => {
   it('forward geocoding on node geocoder sources', async () => {
     for (let i = 0; i < searches.length; i++) {
       const search = searches[i]
-      const params = [ `q=${search.pattern}`, `sources=${search.sources}`, 'limit=1' ]
+      const params = [ `q=${search.pattern}`, `sources=${search.sources}`, 'limit=2' ]
       if (search.viewbox) params.push(`viewbox=${search.viewbox}`)
       const response = await superagent
         .get(`${app.get('baseUrl')}/forward?${params.join('&')}`)
@@ -80,7 +80,7 @@ describe('geokoder:node-geocoder', () => {
     for (let i = 0; i < locations.length; i++) {
       const location = locations[i]
       const response = await superagent
-        .get(`${app.get('baseUrl')}/reverse?lat=${location.lat}&lon=${location.lon}&limit=1&sources=${location.sources}`)
+        .get(`${app.get('baseUrl')}/reverse?lat=${location.lat}&lon=${location.lon}&limit=2&sources=${location.sources}`)
       expect(response.body.length).to.equal(location.results.length)
       response.body.forEach((feature, index) => {
         const result = location.results[index]
