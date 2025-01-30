@@ -32,7 +32,7 @@ Performs *forward* geocoding. Requires at least the `q` parameter which is the s
 Additional query parameters include:
   - `sources`: allows users to only perform geocoding in matching sources. The source matching is based on [minimatch](https://github.com/isaacs/minimatch#minimatch).
   - `viewbox`: specify a bounding box to restrict returned matching features. Any two corner points of the box are accepted as long as they make a proper box, but it needs to be ordered `lon,lat,lon,lat`.
-  - `limit`: limit the number of results returned **per source**. That means if you have a total of `5` sources and you query using a limit of `2`, you'll get at most 10 results.
+  - `limit`: limit the number of results returned. If not provided in the query it'll use the value defined in the `paginate.default.forward` config key. It's also capped using the `paginate.max.forward` value.
 
 > [!NOTE]
 > The `NodeGeocoder` sources (`opendatafrance`, `openstreetmap`, ...) use a limit of 10 results per source by default if none is specified in the query.
@@ -41,18 +41,20 @@ The query returns the list of matching features, as an array. Each feature is gi
   - `source` specifies in which source this feature was found
   - `match` indicates which string value was used to compute relevance score
   - `matchProp` indicates which feature property was used to to compute relevance score
-  - `score` is the computed relevance score
+  - `score` is the computed relevance score. This score is included in the `[0, 1]` range, with `1.0` being the most relevant result. The score computation is based on the [Jaro-Winkler distance](https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance).
 
 ### /reverse?lat=latValue&lon=lonValue&sources=filterPattern (GET)
 
 Performs *reverse* geocoding at the given point. Requires at least the `lat` and `lon` parameters which is the location that'll be searched in the geocoding sources.
 Additional query parameters include:
   - `sources`: allows users to only perform reverse geocoding in matching sources. The source matching is based on [minimatch](https://github.com/isaacs/minimatch#minimatch).
-  - `limit` the number of maximum items to get in the response
   - `distance` the maximum distance of items to be included in the response (useful for nearby location query not much for point in polygon query)
+  - `limit`: limit the number of results in the response. If not provided in the query it'll use the value defined in the `paginate.default.reverse` config key. It's also capped using the `paginate.max.reverse` value.
 
 The query returns the list of matching features, as an array. The service also add to each feature and additional `geokoder` object containing the following fields:
   - `source` specifies in which source this feature was found
+  - `distance` indicates the distance between the query location and the feature (currently only computed when the feature is a point).
+  - `score` is the computed relevance score. This score is included in the `[0, 1]` range, with `1.0` being the most relevant result. The score computation is based on the feature distance to the query location.
 
 ## Configuring
 
