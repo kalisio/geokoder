@@ -112,7 +112,7 @@ export default function (app) {
 
     // score and sort results
     scoreForwardResults(q, response)
-    sortAndLimitResults(response, option.limit)
+    sortAndLimitResults(response, options.limit)
 
     res.json(response)
   })
