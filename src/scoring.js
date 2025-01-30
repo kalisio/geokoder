@@ -68,7 +68,7 @@ export function sortAndLimitResults (results, limit) {
 export function scoreForwardResults (query, results) {
   // Compute a [0, 1] score based on string similarity 1 = best
   results.forEach((result) => {
-    result.geokoder.score = jaroWinklerSimilarity(query.toUpperCase(), result.match.toUpperCase())
+    result.geokoder.score = jaroWinklerSimilarity(query.toUpperCase(), result.geokoder.match.toUpperCase())
   })
 }
 
