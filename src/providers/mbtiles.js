@@ -114,7 +114,7 @@ export async function createMBTilesProvider (app) {
           vtquery([{
             buffer: data, x, y, z
           }], [lon, lat], {
-            radius, limit, layerNames
+            radius, limit, layers: layerNames
           }, (err, result) => {
             if (err) reject(err)
             else resolve(result)
