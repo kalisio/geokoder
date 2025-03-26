@@ -14,7 +14,8 @@ describe('geokoder:mbtiles', () => {
   const locations = [
     { lat: 43.31091, lon: 1.94750, distance: 0, sources: 'mairies:mairies', results: [] },
     { lat: 43.31091, lon: 1.94750, distance: 1000, sources: 'mairies:mairies', results: ['Castelnaudary'] },
-    { lat: 43.31091, lon: 1.94750, distance: 0, sources: 'epci:epci50m', results: ['CC Castelnaudary Lauragais Audois'] }
+    { lat: 43.31091, lon: 1.94750, distance: 0, sources: 'epci:epci50m', results: ['CC Castelnaudary Lauragais Audois'] },
+    { lat: 43.21375, lon: 2.34725, distance: 0, sources: 'carcassonne:commune', results: ['Carcassonne'] }
   ]
 
   before(() => {
@@ -40,11 +41,13 @@ describe('geokoder:mbtiles', () => {
     expect(response.body.geocoders).toExist()
     expect(response.body.geocoders.includes('mairies:mairies')).beFalse()
     expect(response.body.geocoders.includes('epci:epci50m')).beFalse()
+    expect(response.body.geocoders.includes('carcassonne:commune')).beFalse()
     response = await superagent
       .get(`${app.get('baseUrl')}/capabilities/reverse`)
     expect(response.body.geocoders).toExist()
     expect(response.body.geocoders.includes('mairies:mairies')).beTrue()
     expect(response.body.geocoders.includes('epci:epci50m')).beTrue()
+    expect(response.body.geocoders.includes('carcassonne:commune')).beTrue()
   })
   // Let enough time to process
     .timeout(10000)
@@ -54,9 +57,11 @@ describe('geokoder:mbtiles', () => {
       const location = locations[i]
       const response = await superagent
         .get(`${app.get('baseUrl')}/reverse?lat=${location.lat}&lon=${location.lon}&distance=${location.distance}&sources=${location.sources}`)
+      console.log(response.body)
       expect(response.body.length).to.equal(location.results.length)
       response.body.forEach((feature, index) => {
-        expect(_.get(feature, 'properties.nom', '')).to.equal(location.results[index])
+        const name = _.get(feature, 'properties.nom', _.get(feature, 'properties.NOM', ''))
+        expect(name).to.equal(location.results[index])
       })
     }
   })
