@@ -52,8 +52,14 @@ export async function createKanoProvider (app) {
         // Do not expose catalog or local internal services
         if (!service.remote || (path === stripSlashes(`${apiPath}/catalog`))) return
         const serviceName = stripSlashes(path).replace(stripSlashes(apiPath) + '/', '')
-        // Check if defined in config or already exposed as a layer
-        if (!services[serviceName] || _.find(sources, { name: `kano:${serviceName}` })) return
+        // Check if already exposed as a layer
+        if (_.find(sources, { name: `kano:${serviceName}` })) return
+        // Check if defined in the config
+        if (_.every(config.services, (value, key) => {
+          return (key !== _.replace(serviceName, /^.*\//g, '*/'))
+        })) return
+        //if (!services[serviceName] || _.find(sources, { name: `kano:${serviceName}` })) return
+        if (_.find(sources, { name: `kano:${serviceName}` })) return
         // Retrieve keys from service config
         // FIXME might be automated with https://github.com/kalisio/feathers-distributed/issues/125
         sources.push({ name: `services:${serviceName}`, collection: serviceName, keys: services[serviceName] })
