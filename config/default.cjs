@@ -8,7 +8,7 @@ const commonHooks = require('feathers-hooks-common')
 const host = process.env.HOSTNAME || 'localhost'
 const port = process.env.PORT || 8080
 const apiPath = process.env.API_PREFIX || '/api'
-const baseUrl = process.env.BASE_URL || `http://${host}:${port}${apiPath}`
+const baseUrl = process.env.BASE_URL || `http://${host}:${port}`
 
 let i18n = {}
 glob.sync(path.join(__dirname, 'i18n/**/*.cjs')).forEach(i18nFile => {

@@ -21,9 +21,8 @@ export default function (app) {
   const __dirname = path.dirname(__filename)
   const packageInfo = fs.readJsonSync(path.join(__dirname, '..', 'package.json'))
   const paginate = app.get('paginate')
-  const apiPath = app.get('apiPath')
 
-  app.get(`${apiPath}/healthcheck`, (req, res, next) => {
+  app.get('/healthcheck', (req, res, next) => {
     const response = {
       name: 'geokoder',
       // Allow to override version number for custom build
@@ -35,7 +34,7 @@ export default function (app) {
     res.json(response)
   })
 
-  app.get(`${apiPath}/capabilities/:operation`, async (req, res, next) => {
+  app.get('/capabilities/:operation', async (req, res, next) => {
     const operation = _.get(req, 'params.operation')
     const options = { operation }
     const all = Providers.get().filter(provider => typeof provider[operation] === 'function').map(provider => provider.capabilities(options))
@@ -57,7 +56,7 @@ export default function (app) {
     res.json(response)
   })
 
-  app.get(`${apiPath}/forward`, async (req, res, next) => {
+  app.get('/forward', async (req, res, next) => {
     const q = _.get(req.query, 'q')
     const filter = _.get(req.query, 'sources', '*')
     const viewbox = _.get(req.query, 'viewbox', '')
@@ -118,7 +117,7 @@ export default function (app) {
     res.json(response)
   })
 
-  app.get(`${apiPath}/reverse`, async (req, res, next) => {
+  app.get('/reverse', async (req, res, next) => {
     const lat = _.toNumber(_.get(req.query, 'lat'))
     const lon = _.toNumber(_.get(req.query, 'lon'))
 
