@@ -3,9 +3,9 @@ import fs from 'fs-extra'
 import path from 'path'
 import _ from 'lodash'
 import makeDebug from 'debug'
-import { minimatch } from 'minimatch'
 import fetch from 'node-fetch'
 import NodeGeocoder from 'node-geocoder'
+import { filterSources } from '../utils.js'
 
 const debug = makeDebug('geokoder:providers:node-geocoder')
 
@@ -46,8 +46,8 @@ export async function createNodeGeocoderProvider (app) {
     },
 
     async forward ({ search, filter, limit, viewbox }) {
-      const matchingSources = geocoders.filter(geocoder => minimatch(geocoder.name, filter))
-
+      const matchingSources = filterSources(geocoder, filter)
+    
       const requests = []
       // issue requests to geocoders
       debug(`Requesting ${matchingSources.length} matching sources`, _.map(matchingSources, 'name'))
@@ -125,7 +125,7 @@ export async function createNodeGeocoderProvider (app) {
     },
 
     async reverse ({ lat, lon, filter, limit }) {
-      const matchingSources = geocoders.filter(geocoder => minimatch(geocoder.name, filter))
+      const matchingSources = filterSources(geocoder, filter)
 
       const requests = []
       // issue requests to geocoders

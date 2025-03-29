@@ -2,6 +2,7 @@ import _ from 'lodash'
 import fetch from 'node-fetch'
 import makeDebug from 'debug'
 import { minimatch } from 'minimatch'
+import { filterSources } from '../utils.js'
 
 const debug = makeDebug('geokoder:providers:geokoder')
 
@@ -59,7 +60,7 @@ export async function createGeokoderProvider (app) {
 
     async forward ({ search, filter, limit, viewbox }) {
       const sources = await getSources('forward')
-      const matchingSources = sources.filter((source) => minimatch(source.name, filter))
+      const matchingSources = filterSources(sources, filter)
 
       // group queries by proxy
       const groupedQueries = {}
@@ -104,7 +105,7 @@ export async function createGeokoderProvider (app) {
 
     async reverse ({ lat, lon, filter, distance, limit }) {
       const sources = await getSources('forward')
-      const matchingSources = sources.filter((source) => minimatch(source.name, filter))
+      const matchingSources = filterSources(sources, filter)
 
       // group queries by proxy
       const groupedQueries = {}

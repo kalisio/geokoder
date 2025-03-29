@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import makeDebug from 'debug'
-import { minimatch } from 'minimatch'
 import { stripSlashes } from '@feathersjs/commons'
+import { filterSources } from '../utils.js'
 
 const debug = makeDebug('geokoder:providers:kano')
 
@@ -83,10 +83,7 @@ export async function createKanoProvider (app) {
 
     async forward ({ search, filter, limit, viewbox }) {
       const sources = await getSources()
-      // Contextual services contain a / character, and minimatch interprets / differently. 
-      // Therefore, we replace it with _ to enable strict string comparison.
-      filter = _.replace(filter, '/', '_')
-      const matchingSources = sources.filter((source) => minimatch(_.replace(source.name, '/', '_'),  filter))
+      const matchingSources = filterSources(sources, filter)
 
       // issue requests to discovered services
       const requests = []
@@ -139,10 +136,7 @@ export async function createKanoProvider (app) {
 
     async reverse ({ lat, lon, filter, distance, limit }) {
       const sources = await getSources()
-        // Contextual services contain a / character, and minimatch interprets / differently. 
-      // Therefore, we replace it with _ to enable strict string comparison.
-      filter = _.replace(filter, '/', '_')
-      const matchingSources = sources.filter((source) => minimatch(_.replace(source.name, '/', '_'),  filter))
+      const matchingSources = filterSources(sources, filter)
 
       const requests = []
       debug(`Requesting ${matchingSources.length} matching sources`, _.map(matchingSources, 'name'))
