@@ -52,17 +52,18 @@ export async function createKanoProvider (app) {
         // Do not expose catalog or local internal services
         if (!service.remote || (path === stripSlashes(`${apiPath}/catalog`))) return
         const serviceName = stripSlashes(path).replace(stripSlashes(apiPath) + '/', '')
+        const configName = _.replace(serviceName, /^.*\//g, '*/')
         // Check if already exposed as a layer
         if (_.find(sources, { name: `kano:${serviceName}` })) return
         // Check if defined in the config
         if (_.every(config.services, (value, key) => {
-          return (key !== _.replace(serviceName, /^.*\//g, '*/'))
+          return (key !== configName)
         })) return
         //if (!services[serviceName] || _.find(sources, { name: `kano:${serviceName}` })) return
         if (_.find(sources, { name: `kano:${serviceName}` })) return
         // Retrieve keys from service config
         // FIXME might be automated with https://github.com/kalisio/feathers-distributed/issues/125
-        sources.push({ name: `services:${serviceName}`, collection: serviceName, keys: services[serviceName] })
+        sources.push({ name: `services:${serviceName}`, collection: serviceName, keys: services[configName] })
       })
       debug(`Kano provider: found ${sources.length} sources`, _.map(sources, 'name'))
     } catch (error) {
@@ -82,7 +83,10 @@ export async function createKanoProvider (app) {
 
     async forward ({ search, filter, limit, viewbox }) {
       const sources = await getSources()
-      const matchingSources = sources.filter((source) => minimatch(source.name, filter))
+      //const matchingSources = sources.filter((source) => minimatch(source.name, filter))
+      const matchingSources = sources.filter((source) => {
+        return minimatch(_.replace(source.name, '/', '_'), _.replace(filter, '/', '_'))
+      })
 
       // issue requests to discovered services
       const requests = []
