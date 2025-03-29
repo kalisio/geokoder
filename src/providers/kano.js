@@ -83,10 +83,10 @@ export async function createKanoProvider (app) {
 
     async forward ({ search, filter, limit, viewbox }) {
       const sources = await getSources()
-      //const matchingSources = sources.filter((source) => minimatch(source.name, filter))
-      const matchingSources = sources.filter((source) => {
-        return minimatch(_.replace(source.name, '/', '_'), _.replace(filter, '/', '_'))
-      })
+      // Contextual services contain a / character, and minimatch interprets / differently. 
+      // Therefore, we replace it with _ to enable strict string comparison.
+      filter = _.replace(filter, '/', '_')
+      const matchingSources = sources.filter((source) => minimatch(_.replace(source.name, '/', '_'),  filter))
 
       // issue requests to discovered services
       const requests = []
@@ -124,7 +124,7 @@ export async function createKanoProvider (app) {
         for (const feature of features) {
           const name = _.get(feature, source.keys[0])
           response.push({
-            source: source.name,
+            source: _.replace(source.name, /^services:.*\//g, 'services:*/'),
             match: name,
             // TODO: might not be this one
             matchProp: source.keys[0],
@@ -139,7 +139,10 @@ export async function createKanoProvider (app) {
 
     async reverse ({ lat, lon, filter, distance, limit }) {
       const sources = await getSources()
-      const matchingSources = sources.filter((source) => minimatch(source.name, filter))
+        // Contextual services contain a / character, and minimatch interprets / differently. 
+      // Therefore, we replace it with _ to enable strict string comparison.
+      filter = _.replace(filter, '/', '_')
+      const matchingSources = sources.filter((source) => minimatch(_.replace(source.name, '/', '_'),  filter))
 
       const requests = []
       debug(`Requesting ${matchingSources.length} matching sources`, _.map(matchingSources, 'name'))
