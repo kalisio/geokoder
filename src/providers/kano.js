@@ -59,7 +59,6 @@ export async function createKanoProvider (app) {
         if (_.every(config.services, (value, key) => {
           return (key !== configName)
         })) return
-        //if (!services[serviceName] || _.find(sources, { name: `kano:${serviceName}` })) return
         if (_.find(sources, { name: `kano:${serviceName}` })) return
         // Retrieve keys from service config
         // FIXME might be automated with https://github.com/kalisio/feathers-distributed/issues/125

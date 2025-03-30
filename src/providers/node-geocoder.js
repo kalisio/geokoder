@@ -46,8 +46,8 @@ export async function createNodeGeocoderProvider (app) {
     },
 
     async forward ({ search, filter, limit, viewbox }) {
-      const matchingSources = filterSources(geocoder, filter)
-    
+      const matchingSources = filterSources(geocoders, filter)
+
       const requests = []
       // issue requests to geocoders
       debug(`Requesting ${matchingSources.length} matching sources`, _.map(matchingSources, 'name'))
@@ -125,7 +125,7 @@ export async function createNodeGeocoderProvider (app) {
     },
 
     async reverse ({ lat, lon, filter, limit }) {
-      const matchingSources = filterSources(geocoder, filter)
+      const matchingSources = filterSources(geocoders, filter)
 
       const requests = []
       // issue requests to geocoders
