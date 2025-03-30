@@ -1,15 +1,11 @@
 import _ from 'lodash'
+import { minimatch } from 'minimatch'
 import makeDebug from 'debug'
 
 const debug = makeDebug('geokoder:utils')
 
-export function filterSources (geocoders, filter) {
-  let filters = filter.substring(2, filter.length - 1)
-  filters = _.split(filters, '|')
-  return _.reduce(geocoders, (matchingGeocoders, geocoder) => {
-    if (filters.includes(geocoder.name)) matchingGeocoders.push(geocoder)
-    return matchingGeocoders
-  }, [])
+export function filterSources (sources, filter) {
+  return sources.filter((source) => minimatch(_.replace(source.name, '/', '_'),  filter))
 }
 
 export function long2tile (lon, zoom) {
