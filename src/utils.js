@@ -5,7 +5,7 @@ import makeDebug from 'debug'
 const debug = makeDebug('geokoder:utils')
 
 export function filterSources (sources, filter) {
-  return _.filter(sources, (source) => minimatch(_.replace(source.name, '/', '_'),  filter))
+  return _.filter(sources, (source) => minimatch(_.replace(source.name, '/', '_'),  _.replace(filter, '/', '_')))
 }
 
 export function long2tile (lon, zoom) {
