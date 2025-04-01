@@ -44,7 +44,7 @@ export async function createKanoProvider (app) {
         })
       }
       // Otherwise try to retrieve available services as if they are
-      // authorised in the distribution config it should be exposed
+      // authorized in the distribution config it should be exposed
       debug('Seeking for sources in app services')
       const servicePaths = Object.keys(app.services)
       servicePaths.forEach(path => {
@@ -62,7 +62,9 @@ export async function createKanoProvider (app) {
         if (_.find(sources, { name: `kano:${serviceName}` })) return
         // Retrieve keys from service config
         // FIXME might be automated with https://github.com/kalisio/feathers-distributed/issues/125
-        sources.push({ name: `services:${serviceName}`, collection: serviceName, keys: services[configName] })
+        const keys = _.get(services[configName], 'featureLabel', 'properties.name')
+        const baseQuery = _.get(services[configName], 'baseQuery')
+        sources.push({ name: `services:${serviceName}`, collection: serviceName, keys, baseQuery })
       })
       debug(`Kano provider: found ${sources.length} sources`, _.map(sources, 'name'))
     } catch (error) {
@@ -94,6 +96,7 @@ export async function createKanoProvider (app) {
           const query = source.keys.length === 1 ? searches[0] : { $or: searches }
           if (!_.isNil(limit)) query.$limit = limit
           if (!_.isNil(viewbox)) Object.assign(query, { south: viewbox.minLat, north: viewbox.maxLat, west: viewbox.minLon, east: viewbox.maxLon })
+          if (!_.isNil(source.baseQuery)) Object.assign(query, source.baseQuery)
           debug(`Requesting source ${source.name} with query`, query)
           const request = service.find({ query })
           request.source = source
