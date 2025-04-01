@@ -8,8 +8,10 @@ module.exports = {
     },
     Kano: {
       services: {
-        'teleray-stations': ['properties.name'],
-        'rte-units': ['properties.name']
+        'teleray-stations': {
+          featureLabel: ['properties.name']
+        },
+        'rte-units': {}  // default value is 'properties.name'
       }
     },
     MBTiles: {

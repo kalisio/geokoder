@@ -62,7 +62,7 @@ export async function createKanoProvider (app) {
         if (_.find(sources, { name: `kano:${serviceName}` })) return
         // Retrieve keys from service config
         // FIXME might be automated with https://github.com/kalisio/feathers-distributed/issues/125
-        const keys = _.get(services[configName], 'featureLabel', 'properties.name')
+        const keys = _.get(services[configName], 'featureLabel', ['properties.name'])
         const baseQuery = _.get(services[configName], 'baseQuery')
         sources.push({ name: `services:${serviceName}`, collection: serviceName, keys, baseQuery })
       })
