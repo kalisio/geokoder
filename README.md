@@ -85,6 +85,27 @@ module.exports = {
 
 For now, each layer in the catalog exposing the `featureLabel` property will be taken into account. This property can be a single string value or an array of strings to target multiple fields.
 
+In addition to using exposed **Kano** layers from the catalog service, it is also possible to use additional distributed services. Services are declared using the following formalism: 
+
+```js
+> services: {
+>   'service_name': {
+>      featureLabel: ['properties.fiel_name'],  // Default value is ['properties.name']
+>      baseQuery: { query }  // Default value is undefined
+>   }
+> }
+```
+
+> [!NOTE]
+> When dealing with [KDK](https://kalisio.github.io/kdk/)-based applications and wanting to use contextual distributed services, you need to declare the services such as the following example:
+> ```js
+> services: {
+>   '*/measures': {
+>      featureLabel: ['properties.location']
+>   }
+> }
+> ```
+
 #### NodeGeocoder
 
 Each key is a geocoder to instanciate in [node-geocoder](https://github.com/nchaulet/node-geocoder). If value is false-ish, it won't be instanciated. If you'd like to pass additional options to the geocoder instance then it could be an object containing the options.
@@ -102,8 +123,7 @@ Each key will be a new dataset based on the provided file and exposing some laye
 
 `admin-express': { filepath: path.join(__dirname, '../data/mbtiles/admin-express.mbtiles'), layers: ['commune', 'departement']`. 
 
-> NOTE
-> 
+> [!NOTE]
 > For performance reason each layer in a dataset should have the same max zoom level, if not two different datasets should be created for now.
 
 #### Geokoder
@@ -159,8 +179,7 @@ Here are the environment variables you can use to customize the service:
 | `BASE_URL` | The url used when exposing the service | `localhost:8080` |
 | `API_PATH` | The path to the API |
 
-> Note
->
+> [!NOTE]
 > Most of these variables are defined for convenience in order to run the tests.
 
 ## Building

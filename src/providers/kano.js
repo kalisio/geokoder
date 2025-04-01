@@ -64,10 +64,6 @@ export async function createKanoProvider (app) {
         // FIXME might be automated with https://github.com/kalisio/feathers-distributed/issues/125
         const keys = _.get(services[configName], 'featureLabel', ['properties.name'])
         const baseQuery = _.get(services[configName], 'baseQuery')
-        debug('Kano provider found:')
-        debug('service name:', serviceName)
-        debug('feature labels:', keys)
-        debug('base query:', baseQuery)
         sources.push({ name: `services:${serviceName}`, collection: serviceName, keys, baseQuery })
       })
       debug(`Kano provider: found ${sources.length} sources`, _.map(sources, 'name'))
