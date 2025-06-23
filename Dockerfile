@@ -13,9 +13,9 @@ RUN yarn install
 # Copy build to slim image
 FROM node:${NODE_VERSION}-${DEBIAN_VERSION}-slim
 
-LABEL maintainer "<contact@kalisio.xyz>"
+LABEL maintainer="<contact@kalisio.xyz>"
 COPY --from=builder --chown=node:node /geokoder /geokoder
 WORKDIR /geokoder
 USER node
 EXPOSE 8080
-CMD npm run prod
+CMD [ "npm", "run", "prod" ]
