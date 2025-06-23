@@ -3,7 +3,6 @@ import fs from 'fs-extra'
 import path from 'path'
 import _ from 'lodash'
 import makeDebug from 'debug'
-import fetch from 'node-fetch'
 import NodeGeocoder from 'node-geocoder'
 import { filterSources } from '../utils.js'
 

@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import fetch from 'node-fetch'
 import makeDebug from 'debug'
 import { minimatch } from 'minimatch'
 import { filterSources } from '../utils.js'
