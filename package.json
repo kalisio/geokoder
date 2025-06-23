@@ -73,7 +73,7 @@
     "cross-env": "^7.0.3",
     "mocha": "^9.2.2",
     "nodemon": "^2.0.15",
-    "standard": "^16.0.4",
+    "standard": "^17.1.0",
     "superagent": "^8.1.2"
   },
   "resolutions": {
