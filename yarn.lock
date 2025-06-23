@@ -8482,7 +8482,7 @@ standard-engine@^15.1.0:
     pkg-conf "^3.1.0"
     xdg-basedir "^4.0.0"
 
-standard@^17.1.0:
+standard@^17.1.2:
   version "17.1.2"
   resolved "https://registry.yarnpkg.com/standard/-/standard-17.1.2.tgz#fc7e365e401569fee2a840d2a3862d218ef78092"
   integrity sha512-WLm12WoXveKkvnPnPnaFUUHuOB2cUdAsJ4AiGHL2G0UNMrcRAWY2WriQaV8IQ3oRmYr0AWUbLNr94ekYFAHOrA==
