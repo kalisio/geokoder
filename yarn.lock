@@ -7120,10 +7120,9 @@ node-fetch@^2.6.7:
   dependencies:
     whatwg-url "^5.0.0"
 
-node-geocoder@~4.4.1:
+"node-geocoder@git+https://github.com/nchaulet/node-geocoder.git#f66ea8db928d780b5d4268938909f86fba503eef":
   version "4.4.1"
-  resolved "https://registry.yarnpkg.com/node-geocoder/-/node-geocoder-4.4.1.tgz#f612837dd062ba1084dd33d53f0e81c158694a76"
-  integrity sha512-krx50Gxl4yBgMBhfUhOuNwStzLi+gAYaa46gs0e+ftTvaqLsjKYDFVxC8ff6RLc2f11Gp7Y+R1mkzwsE2c0chw==
+  resolved "git+https://github.com/nchaulet/node-geocoder.git#f66ea8db928d780b5d4268938909f86fba503eef"
   dependencies:
     bluebird "^3.5.2"
     node-fetch "^2.6.0"

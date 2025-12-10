@@ -60,7 +60,7 @@
     "glob": "^10.3.10",
     "lodash": "^4.17.21",
     "minimatch": "^9.0.3",
-    "node-geocoder": "~4.4.1",
+    "node-geocoder": "git+https://github.com/nchaulet/node-geocoder.git#f66ea8db928d780b5d4268938909f86fba503eef",
     "winston": "^3.2.1",
     "winston-daily-rotate-file": "^3.10.0",
     "zlib": "^1.0.5"
