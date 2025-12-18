@@ -67,7 +67,9 @@ Here is an example file that exposes all the sources from the **Kano** provider,
 ```js
 module.exports = {
   providers: {
-    Kano: {},
+    Kano: {
+      catalogFilter: 'hubeau-*'
+    },
     NodeGeocoder: {
       opendatafrance: true
     },
@@ -83,17 +85,25 @@ module.exports = {
 
 #### Kano
 
-For now, each layer in the catalog exposing the `featureLabel` property will be taken into account. This property can be a single string value or an array of strings to target multiple fields.
+Each layer in the `catalog` service exposing the `featureLabel` property will be taken into account. This property can be a single string value or an array of strings to target multiple fields.
 
-In addition to using exposed **Kano** layers from the catalog service, it is also possible to use additional distributed services. Services are declared using the following formalism: 
+These *catalog* layers can be filtered using the configuration key `catalogFilter`. This string is a [minimatch](https://github.com/isaacs/minimatch#minimatch) expression, the layer's service name will be matched against the expression.
+
+``` js
+Kano: {
+  catalogFilter: 'hubeau-*'
+}
+```
+
+In addition to using exposed **Kano** layers from the `catalog` service, it is also possible to use additional distributed services. Services are declared using the following formalism:
 
 ```js
-> services: {
->   'service_name': {
->      featureLabel: ['properties.fiel_name'],  // Default value is ['properties.name']
->      baseQuery: { query }  // Default value is undefined
->   }
-> }
+services: {
+  'service_name': {
+     featureLabel: ['properties.fiel_name'],  // Default value is ['properties.name']
+     baseQuery: { query }  // Default value is undefined
+  }
+}
 ```
 
 > [!NOTE]

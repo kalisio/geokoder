@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import makeDebug from 'debug'
 import { stripSlashes } from '@feathersjs/commons'
-import { filterSources } from '../utils.js'
+import { filterSource, filterSources } from '../utils.js'
 
 const debug = makeDebug('geokoder:providers:kano')
 
@@ -37,8 +37,10 @@ export async function createKanoProvider (app) {
           // featureLabel refers to feature properties
           const featureLabels = _.castArray(layer.featureLabel).map((prop) => `properties.${prop}`)
           // Make sure we don't already expose a source from the same collection
-          const known = sources.find((src) => src.collection === collection)
-          if (!known) {
+          const known = sources.find((src) => src.collection === collection) !== undefined
+          // Make sure layer is not filtered out
+          const allowed = filterSource(collection, config.catalogFilter)
+          if (!known && allowed) {
             sources.push({ name: `kano:${collection}`, collection, keys: featureLabels })
           }
         })
