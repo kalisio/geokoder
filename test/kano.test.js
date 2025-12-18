@@ -109,17 +109,19 @@ describe('geokoder:kano', () => {
   // Let enough time to process
     .timeout(15000)
 
-  it('kano sources from catalog appear in capabilities', async () => {
+  it('only allowed kano sources from catalog appear in capabilities', async () => {
     let response = await superagent
       .get(`${app.get('baseUrl')}/capabilities/forward`)
     expect(response.body.geocoders).toExist()
     expect(response.body.geocoders.includes('kano:teleray-stations')).beTrue()
     expect(response.body.geocoders.includes('kano:rte-units')).beTrue()
+    expect(response.body.geocoders.includes('kano:filtered-units')).beFalse()
     response = await superagent
       .get(`${app.get('baseUrl')}/capabilities/reverse`)
     expect(response.body.geocoders).toExist()
     expect(response.body.geocoders.includes('kano:teleray-stations')).beTrue()
     expect(response.body.geocoders.includes('kano:rte-units')).beTrue()
+    expect(response.body.geocoders.includes('kano:filtered-units')).beFalse()
   })
   // Let enough time to process
     .timeout(10000)

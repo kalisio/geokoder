@@ -7,6 +7,7 @@ module.exports = {
       openstreetmap: true
     },
     Kano: {
+      catalogFilter: '!filtered-*',
       services: {
         'teleray-stations': {
           featureLabel: ['properties.name']
