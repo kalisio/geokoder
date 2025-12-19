@@ -1,33 +1,42 @@
+# permet d'exclure des parties de l'analise comme Sonar.exclude
 exclude_patterns:
 - "lib/"
 plugins:
+# Permet de capter s'il y a dans les commentaires des FIXME, TODO, etc. (j'ai jamais vu dans le code de Kalisio)
   fixme:
     enabled: true
 checks:
+  # Permet de surveiller la quantité de parametre par fonction
   argument-count:
     config:
       threshold: 4
+  # Permet de surveiller la complexité des fonctions
   complex-logic:
     config:
       threshold: 4
+  # Surveiller la taille en lignes des fichiers
   file-lines:
     config:
       threshold: 500
+  # Permet de surveiller la complexité des fonctions (je sais pas trop quelle unité ils utilisent)
   method-complexity:
     config:
       threshold: 20
+  # Limiter le nombre de méthodes
   method-count:
     config:
       threshold: 20
   method-lines:
     config:
       threshold: 50
+  # Voie s'il y a des boucles imbrquées pour la complexité
   nested-control-flow:
     config:
       threshold: 4
   return-statements:
     config:
       threshold: 4
+  # meme chose que la duplication de SonarQube
   similar-code:
     enabled: false
   identical-code:
