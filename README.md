@@ -2,6 +2,7 @@
 
 [![Latest Release](https://img.shields.io/github/v/tag/kalisio/geokoder?sort=semver&label=latest)](https://github.com/kalisio/geokoder/releases)
 [![CI](https://github.com/kalisio/geokoder/actions/workflows/main.yaml/badge.svg)](https://github.com/kalisio/geokoder/actions/workflows/main.yaml)
+[![Quality Gate Status](https://sonar.portal.kalisio.com/api/project_badges/measure?project=kalisio-geokoder&metric=alert_status&token=sqb_6dfe76ab4298a1833ec9e5f3610ca5fe0064eafb)](https://sonar.portal.kalisio.com/dashboard?id=kalisio-geokoder)
 [![Maintainability Issues](https://sonar.portal.kalisio.com/api/project_badges/measure?project=kalisio-geokoder&metric=software_quality_maintainability_issues&token=sqb_6dfe76ab4298a1833ec9e5f3610ca5fe0064eafb)](https://sonar.portal.kalisio.com/dashboard?id=kalisio-geokoder)
 [![Coverage](https://sonar.portal.kalisio.com/api/project_badges/measure?project=kalisio-geokoder&metric=coverage&token=sqb_6dfe76ab4298a1833ec9e5f3610ca5fe0064eafb)](https://sonar.portal.kalisio.com/dashboard?id=kalisio-geokoder)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
